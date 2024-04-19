@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" itemscope itemtype="http://schema.org/WebPage">
-<head>
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
   <meta charset="utf-8" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,7 +13,7 @@
 
   <meta name="description" content="OSComp 2024 随记 · 零" /><meta name="generator" content="Hugo 0.124.1">
 
-  <link rel="stylesheet" href="https://example.org/css/main.css" />
+  <link rel="stylesheet" href="//localhost:1313/css/main.css" />
 
   
   
@@ -21,26 +21,26 @@
   <meta property="og:title" content="第零章：实验环境配置 · rCore 2024S 随记" />
 <meta property="og:description" content="OSComp 2024 随记 · 零" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://example.org/articles/rcore_2024s_0/" /><meta property="og:image" content="https://example.org/digital-garden-logo.png" /><meta property="article:section" content="articles" />
+<meta property="og:url" content="//localhost:1313/articles/rcore_2024s_0/" /><meta property="og:image" content="//localhost:1313/digital-garden-logo.png" /><meta property="article:section" content="articles" />
 <meta property="article:published_time" content="2024-04-19T00:00:00+00:00" />
 <meta property="article:modified_time" content="2024-04-19T00:00:00+00:00" />
 
 
   <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="https://example.org/digital-garden-logo.png" /><meta name="twitter:title" content="第零章：实验环境配置 · rCore 2024S 随记"/>
+<meta name="twitter:image" content="//localhost:1313/digital-garden-logo.png" /><meta name="twitter:title" content="第零章：实验环境配置 · rCore 2024S 随记"/>
 <meta name="twitter:description" content="OSComp 2024 随记 · 零"/>
 
 
   <meta itemprop="name" content="第零章：实验环境配置 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 零"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="363"><meta itemprop="image" content="https://example.org/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="367"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 
   <meta itemprop="name" content="第零章：实验环境配置 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 零"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="363"><meta itemprop="image" content="https://example.org/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="367"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 </head><body class="flex relative h-full min-h-screen"><aside
   class="will-change-transform transform transition-transform -translate-x-full absolute top-0 left-0 md:relative md:translate-x-0 w-3/4 md:basis-60 h-full min-h-screen p-3 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col gap-2.5 z-20 sidebar flex-shrink-0">
@@ -52,7 +52,7 @@
   <line x1="18" y1="6" x2="6" y2="18" />
   <line x1="6" y1="6" x2="18" y2="18" />
 </svg></button>
-    <a href="https://example.org/" class="px-2">
+    <a href="//localhost:1313/" class="px-2">
       <span>255DoesNotExist</span>
     </a>
     <button aria-label="Toggle dark mode"
@@ -298,7 +298,7 @@
   lg:translate-x-0 lg:basis-[400px] h-full bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 lg:flex flex-col py-3 overflow-y-auto scroll-area flex-shrink-0">
     
     
-    <a href="https://example.org/articles/">
+    <a href="//localhost:1313/articles/">
       <h2 class="font-bold mb-5 py-1 pl-12 pr-3 md:px-3">Articles</h2>
     </a>
 <label class="mb-2 block px-2">
@@ -336,8 +336,9 @@
         <div
           class="text-sm  text-slate-500 dark:text-slate-400  line-clamp-2">
           前言 实际实践参考的文档：rCore Tutorial Guide 2024S。
+拥有更为详细细节介绍的 rCore OS 官方文档：rCore-Tutorial-Book-v3。
 第一章：应用程序与基本执行环境 引言 本章预期代码树：
-├── bootloader (内核依赖的运行在 M 特权级的 SBI 实现，本项目中我们使用 RustSBI) │ └── rustsbi-qemu.bin ├── os │ ├── Cargo.toml (cargo 项目配置文件) │ ├── Makefile │ └── src │ ├── console.rs (将打印字符的 SBI 接口进一步封装实现更加强大的格式化输出) │ ├── entry.asm (设置内核执行环境的的一段汇编代码) │ ├── lang_items.rs (需要我们提供给 Rust 编译器的一些语义项，目前包含内核 panic 时的处理逻辑) │ ├── linker.ld (控制内核内存布局的链接脚本以使内核运行在 qemu 虚拟机上) │ ├── logging.rs (为本项目实现了日志功能) │ ├── main.rs (内核主函数) │ └── sbi.rs (封装底层 SBI 实现提供的 SBI 接口) └── rust-toolchain (整个项目的工具链版本) cloc os ------------------------------------------------------------------------------- Language files blank comment code ------------------------------------------------------------------------------- Rust 5 25 6 155 make 1 11 4 34 Assembly 1 1 0 11 TOML 1 2 1 7 ------------------------------------------------------------------------------- SUM: 8 39 11 207 ------------------------------------------------------------------------------- 
+├── bootloader (内核依赖的运行在 M 特权级的 SBI 实现，本项目中我们使用 RustSBI) │ └── rustsbi-qemu.bin ├── os │ ├── Cargo.toml (cargo 项目配置文件) │ ├── Makefile │ └── src │ ├── console.rs (将打印字符的 SBI 接口进一步封装实现更加强大的格式化输出) │ ├── entry.asm (设置内核执行环境的的一段汇编代码) │ ├── lang_items.rs (需要我们提供给 Rust 编译器的一些语义项，目前包含内核 panic 时的处理逻辑) │ ├── linker.ld (控制内核内存布局的链接脚本以使内核运行在 qemu 虚拟机上) │ ├── logging.rs (为本项目实现了日志功能) │ ├── main.rs (内核主函数) │ └── sbi.
         </div>
       </a>
       
@@ -349,10 +350,11 @@
         <div
           class="text-sm  text-slate-400  line-clamp-2">
           前言 实际实践参考的文档：rCore Tutorial Guide 2024S。
+拥有更为详细细节介绍的 rCore OS 官方文档：rCore-Tutorial-Book-v3。
 第零章：实验环境配置 OS 环境配置 OS环境 Ubuntu Server 22.04 amd64。
 Rust 开发环境配置 通过 rustup 安装的当前最新版工具链。
 curl https://sh.rustup.rs -sSf | sh Qemu 模拟器安装 参考文档，从源码安装 Qemu 7.0.0。
-sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \ gawk build-essential bison flex texinfo gperf libtool patchutils bc \ zlib1g-dev libexpat-dev pkg-config libglib2.0-dev libpixman-1-dev git tmux python3 wget https://download.qemu.org/qemu-7.0.0.tar.xz # 解压 tar xvJf qemu-7.0.0.tar.xz # 编译安装并配置 RISC-V 支持 cd qemu-7.0.0 .
+sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \ gawk build-essential bison flex texinfo gperf libtool patchutils bc \ zlib1g-dev libexpat-dev pkg-config libglib2.0-dev libpixman-1-dev git tmux python3 wget https://download.qemu.org/qemu-7.0.0.tar.xz # 解压 tar xvJf qemu-7.0.0.tar.xz # 编译安装并配置 RISC-V 支持 cd qemu-7.
         </div>
       </a>
       
@@ -385,6 +387,7 @@ sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev lib
 
       <h1 id="前言">前言</h1>
 <p>实际实践参考的文档：<a href="https://learningos.cn/rCore-Tutorial-Guide-2024S/"  target="_blank" rel="noopener" >rCore Tutorial Guide 2024S</a>。</p>
+<p>拥有更为详细细节介绍的 rCore OS 官方文档：<a href="https://rcore-os.cn/rCore-Tutorial-Book-v3/chapter0/0intro.html"  target="_blank" rel="noopener" >rCore-Tutorial-Book-v3</a>。</p>
 <h1 id="第零章实验环境配置">第零章：实验环境配置</h1>
 <h2 id="os-环境配置">OS 环境配置</h2>
 <p>OS环境 Ubuntu Server 22.04 amd64。</p>
