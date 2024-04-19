@@ -3,7 +3,7 @@ title: Homepage
 ---
 
 <h3 align="center">
-  👋Hi! I'm 255. <img src="https://avatars.githubusercontent.com/u/19223209?v=4" alt="" size="20" height="20" width="20" style="border: 2px solid black; border-radius: 50%;"></img>
+  👋Hi! I'm 255. <img src="https://avatars.githubusercontent.com/u/19223209?v=4" alt="" size="40" height="40" width="40" style="border: 2px solid black; border-radius: 50%;"></img>
 </h3>
 
 <p align="center">

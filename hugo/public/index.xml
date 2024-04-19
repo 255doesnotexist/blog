@@ -13,14 +13,14 @@
       <link>//localhost:1313/articles/rcore_2024s_1/</link>
       <pubDate>Fri, 19 Apr 2024 00:00:00 +0000</pubDate>
       <guid>//localhost:1313/articles/rcore_2024s_1/</guid>
-      <description>前言 实际实践参考的文档：rCore Tutorial Guide 2024S。 拥有更为详细细节介绍的 rCore OS 官方文档：rCore-Tutorial-Book-v3&#xA;第一章：应用程序与基本执行环境 引言 本章预期代码树：&#xA;├── bootloader (内核依赖的运行在 M 特权级的 SBI 实现，本项目中我们使用 RustSBI) │ └── rustsbi-qemu.bin ├── os │ ├── Cargo.toml (cargo 项目配置文件) │ ├── Makefile │ └── src │ ├── console.rs (将打印字符的 SBI 接口进一步封装实现更加强大的格式化输出) │ ├── entry.asm (设置内核执行环境的的一段汇编代码) │ ├── lang_items.rs (需要我们提供给 Rust 编译器的一些语义项，目前包含内核 panic 时的处理逻辑) │ ├── linker.ld (控制内核内存布局的链接脚本以使内核运行在 qemu 虚拟机上) │ ├── logging.rs (为本项目实现了日志功能) │ ├── main.rs (内核主函数) │ └── sbi.</description>
+      <description>前言 实际实践参考的文档：rCore Tutorial Guide 2024S。&#xA;拥有更为详细细节介绍的 rCore OS 官方文档：rCore-Tutorial-Book-v3。&#xA;第一章：应用程序与基本执行环境 引言 本章预期代码树：&#xA;├── bootloader (内核依赖的运行在 M 特权级的 SBI 实现，本项目中我们使用 RustSBI) │ └── rustsbi-qemu.bin ├── os │ ├── Cargo.toml (cargo 项目配置文件) │ ├── Makefile │ └── src │ ├── console.rs (将打印字符的 SBI 接口进一步封装实现更加强大的格式化输出) │ ├── entry.asm (设置内核执行环境的的一段汇编代码) │ ├── lang_items.rs (需要我们提供给 Rust 编译器的一些语义项，目前包含内核 panic 时的处理逻辑) │ ├── linker.ld (控制内核内存布局的链接脚本以使内核运行在 qemu 虚拟机上) │ ├── logging.rs (为本项目实现了日志功能) │ ├── main.rs (内核主函数) │ └── sbi.</description>
     </item>
     <item>
       <title>第零章：实验环境配置 · rCore 2024S 随记</title>
       <link>//localhost:1313/articles/rcore_2024s_0/</link>
       <pubDate>Fri, 19 Apr 2024 00:00:00 +0000</pubDate>
       <guid>//localhost:1313/articles/rcore_2024s_0/</guid>
-      <description>前言 实际实践参考的文档：rCore Tutorial Guide 2024S。 拥有更为详细细节介绍的 rCore OS 官方文档：rCore-Tutorial-Book-v3&#xA;第零章：实验环境配置 OS 环境配置 OS环境 Ubuntu Server 22.04 amd64。&#xA;Rust 开发环境配置 通过 rustup 安装的当前最新版工具链。&#xA;curl https://sh.rustup.rs -sSf | sh Qemu 模拟器安装 参考文档，从源码安装 Qemu 7.0.0。&#xA;sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \ gawk build-essential bison flex texinfo gperf libtool patchutils bc \ zlib1g-dev libexpat-dev pkg-config libglib2.0-dev libpixman-1-dev git tmux python3 wget https://download.qemu.org/qemu-7.0.0.tar.xz # 解压 tar xvJf qemu-7.0.0.tar.xz # 编译安装并配置 RISC-V 支持 cd qemu-7.</description>
+      <description>前言 实际实践参考的文档：rCore Tutorial Guide 2024S。&#xA;拥有更为详细细节介绍的 rCore OS 官方文档：rCore-Tutorial-Book-v3。&#xA;第零章：实验环境配置 OS 环境配置 OS环境 Ubuntu Server 22.04 amd64。&#xA;Rust 开发环境配置 通过 rustup 安装的当前最新版工具链。&#xA;curl https://sh.rustup.rs -sSf | sh Qemu 模拟器安装 参考文档，从源码安装 Qemu 7.0.0。&#xA;sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \ gawk build-essential bison flex texinfo gperf libtool patchutils bc \ zlib1g-dev libexpat-dev pkg-config libglib2.0-dev libpixman-1-dev git tmux python3 wget https://download.qemu.org/qemu-7.0.0.tar.xz # 解压 tar xvJf qemu-7.0.0.tar.xz # 编译安装并配置 RISC-V 支持 cd qemu-7.</description>
     </item>
     <item>
       <title>Hello</title>
