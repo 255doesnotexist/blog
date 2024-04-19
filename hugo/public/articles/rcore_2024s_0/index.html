@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="icon" href="/favicon.ico">
+
+  <title>
+    第零章：实验环境配置 · rCore 2024S 随记 - 255DoesNotExist
+  </title>
+
+  <meta name="description" content="OSComp 2024 随记 · 零" /><meta name="generator" content="Hugo 0.124.1">
+
+  <link rel="stylesheet" href="http://localhost:1313/css/main.css" />
+
+  
+  
+
+  <meta property="og:title" content="第零章：实验环境配置 · rCore 2024S 随记" />
+<meta property="og:description" content="OSComp 2024 随记 · 零" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:1313/articles/rcore_2024s_0/" /><meta property="og:image" content="http://localhost:1313/digital-garden-logo.png" /><meta property="article:section" content="articles" />
+<meta property="article:published_time" content="2024-04-19T00:00:00+00:00" />
+<meta property="article:modified_time" content="2024-04-19T00:00:00+00:00" />
+
+
+  <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="http://localhost:1313/digital-garden-logo.png" /><meta name="twitter:title" content="第零章：实验环境配置 · rCore 2024S 随记"/>
+<meta name="twitter:description" content="OSComp 2024 随记 · 零"/>
+
+
+  <meta itemprop="name" content="第零章：实验环境配置 · rCore 2024S 随记">
+<meta itemprop="description" content="OSComp 2024 随记 · 零"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
+<meta itemprop="wordCount" content="363"><meta itemprop="image" content="http://localhost:1313/digital-garden-logo.png" />
+<meta itemprop="keywords" content="" />
+
+  <meta itemprop="name" content="第零章：实验环境配置 · rCore 2024S 随记">
+<meta itemprop="description" content="OSComp 2024 随记 · 零"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
+<meta itemprop="wordCount" content="363"><meta itemprop="image" content="http://localhost:1313/digital-garden-logo.png" />
+<meta itemprop="keywords" content="" />
+</head><body class="flex relative h-full min-h-screen"><aside
+  class="will-change-transform transform transition-transform -translate-x-full absolute top-0 left-0 md:relative md:translate-x-0 w-3/4 md:basis-60 h-full min-h-screen p-3 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col gap-2.5 z-20 sidebar flex-shrink-0">
+  <p class="font-bold mb-5 flex items-center gap-2">
+    <button aria-label="Close sidebar"
+      class="md:hidden menu-trigger-close p-1 rounded text-slate-800 dark:text-slate-50 hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="h-6 w-6" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+  fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" />
+  <line x1="18" y1="6" x2="6" y2="18" />
+  <line x1="6" y1="6" x2="18" y2="18" />
+</svg></button>
+    <a href="http://localhost:1313/" class="px-2">
+      <span>255DoesNotExist</span>
+    </a>
+    <button aria-label="Toggle dark mode"
+      class="dark-mode-toggle p-2 rounded border dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="h-4 w-4" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+  fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" />
+  <circle cx="12" cy="12" r="4" />
+  <path d="M3 12h1M12 3v1M20 12h1M12 20v1M5.6 5.6l.7 .7M18.4 5.6l-.7 .7M17.7 17.7l.7 .7M6.3 17.7l-.7 .7" />
+</svg></button>
+  </p>
+
+  
+  <ul class="list-none flex flex-col gap-1">
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm flex items-center justify-between  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="/" >
+        <span>Home</span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm flex items-center justify-between  text-slate-400 font-semibold pb-0 pl-1 border-b cursor-default pointer-events-none "
+        href="#" >
+        <span>Content</span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm flex items-center justify-between  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="/articles" >
+        <span>Articles</span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm flex items-center justify-between  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="/stack" >
+        <span>Stack</span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm flex items-center justify-between  text-slate-400 font-semibold pb-0 pl-1 border-b cursor-default pointer-events-none "
+        href="#" >
+        <span>Links</span>
+        
+      </a>
+    </li>
+    
+  </ul>
+
+  <div class="flex-1"></div>
+
+  <div class="newsletter-widget">
+  <div class="text-bold text-sm">Subscribe to my newsletter</div>
+  
+  <p class="text-xs my-1 text-slate-500">A curated weekly digest once a week to your mailbox</p>
+  
+
+  
+  
+  
+  
+
+  
+
+  <form action="https://buttondown.email/api/emails/embed-subscribe/" method="post" id="newsletter_form" name="" target="_blank">
+    <div class="mt-2">
+      <input type="email" class="w-full px-1.5 py-0.5 text-sm rounded border dark:border-slate-700 dark:bg-slate-600" name="email" id="member_email" placeholder="Your email address...">
+      <input type="submit" class="mt-2 w-full text-center text-sm bg-slate-800 text-white dark:bg-slate-50 dark:text-slate-800 py-1 rounded cursor-pointer" name="subscribe" id="member_submit" value="Subscribe">
+    </div>
+  </form>
+
+  
+</div>
+
+  <ul class="list-none flex flex-wrap justify-center gap-1 pt-2 border-t border-slate-200 dark:border-slate-600">
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm block text-slate-800 dark:text-slate-50  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="https://twitter.com" target="_blank" rel="noopener noreferrer">
+        <span class="sr-only">Twitter</span>
+        
+        <span><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round">
+  <path
+    d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+</svg></span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm block text-slate-800 dark:text-slate-50  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="https://github.com" target="_blank" rel="noopener noreferrer">
+        <span class="sr-only">GitHub</span>
+        
+        <span><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round">
+  <path
+    d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+</svg></span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm block text-slate-800 dark:text-slate-50  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
+        <span class="sr-only">LinkedIn</span>
+        
+        <span><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round">
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+  <rect x="2" y="9" width="4" height="12" />
+  <circle cx="4" cy="4" r="2" />
+</svg></span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm block text-slate-800 dark:text-slate-50  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+        <span class="sr-only">Instagram</span>
+        
+        <span><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+</svg></span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm block text-slate-800 dark:text-slate-50  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="https://dribbble.com" target="_blank" rel="noopener noreferrer">
+        <span class="sr-only">Dribbble</span>
+        
+        <span><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" />
+  <path
+    d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32" />
+</svg></span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm block text-slate-800 dark:text-slate-50  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="https://codepen.io" target="_blank" rel="noopener noreferrer">
+        <span class="sr-only">Codepen</span>
+        
+        <span><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round">
+  <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+  <line x1="12" y1="22" x2="12" y2="15.5" />
+  <polyline points="22 8.5 12 15.5 2 8.5" />
+  <polyline points="2 15.5 12 8.5 22 15.5" />
+  <line x1="12" y1="2" x2="12" y2="8.5" />
+</svg></span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm block text-slate-800 dark:text-slate-50  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="https://twitch.com" target="_blank" rel="noopener noreferrer">
+        <span class="sr-only">Twitch</span>
+        
+        <span><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round">
+  <path d="M21 2H3v16h5v4l4-4h5l4-4V2zM11 11V7M16 11V7" />
+</svg></span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm block text-slate-800 dark:text-slate-50  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="mailto:user@example.org" target="_blank" rel="noopener noreferrer">
+        <span class="sr-only">Email</span>
+        
+        <span><svg class="h-4 w-4" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+  fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" />
+  <rect x="3" y="5" width="18" height="14" rx="2" />
+  <polyline points="3 7 12 13 21 7" />
+</svg></span>
+        
+      </a>
+    </li>
+    
+    <li>
+      <a class="px-2 py-1.5 rounded-md text-sm block text-slate-800 dark:text-slate-50  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="/articles/index.xml" target="_blank" rel="noopener noreferrer">
+        <span class="sr-only">RSS</span>
+        
+        <span><svg class="h-4 w-4" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+  fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" />
+  <circle cx="5" cy="19" r="1" />
+  <path d="M4 4a16 16 0 0 1 16 16" />
+  <path d="M4 11a9 9 0 0 1 9 9" />
+</svg></span>
+        
+      </a>
+    </li>
+    
+  </ul>
+</aside>
+
+<div
+  class="fixed bg-slate-700 bg-opacity-5 transition duration-200 ease-in-out inset-0 z-10 pointer-events-auto md:hidden left-0 top-0 w-full h-full hidden menu-overlay">
+</div>
+
+<button aria-label="Toggle Sidebar"
+  class="md:hidden absolute top-3 left-3 z-10 menu-trigger p-1 rounded text-slate-800 dark:text-slate-50 hover:bg-slate-100"><svg class="h-6 w-6" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+  fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" />
+  <line x1="4" y1="6" x2="20" y2="6" />
+  <line x1="4" y1="12" x2="20" y2="12" />
+  <line x1="4" y1="18" x2="16" y2="18" />
+</svg></button>
+
+
+
+
+
+
+<div class="flex flex-1 h-screen relative w-full min-w-0">
+
+  <section
+    class="will-change-transform transform transition-transform -translate-x-[200%] absolute top-0 left-0 lg:relative
+  lg:translate-x-0 lg:basis-[400px] h-full bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 lg:flex flex-col py-3 overflow-y-auto scroll-area flex-shrink-0">
+    
+    
+    <a href="http://localhost:1313/articles/">
+      <h2 class="font-bold mb-5 py-1 pl-12 pr-3 md:px-3">Articles</h2>
+    </a>
+<label class="mb-2 block px-2">
+  <span></span>
+  <input type="text" placeholder="Search articles" class="searchInput bg-white rounded px-2 py-1 w-full border" />
+</label>
+<script>
+  const searchElt = document.querySelector('.searchInput')
+  if (searchElt) {
+    searchElt.addEventListener('input', evt => {
+      const value = evt.target.value || '';
+
+      const articles = document.querySelectorAll('.article')
+      if (!value) {
+        articles.forEach(article => article.classList.remove('hidden'))
+      } else {
+        articles.forEach(article => article.classList.add('hidden'))
+        Array.from(articles).filter(article => {
+          const title = article.querySelector('h3')
+          if (!title) return false;
+
+          return title.textContent.toLowerCase().includes(value.toLowerCase())
+        }).forEach(article => article.classList.remove('hidden'))
+      }
+    })
+  }
+</script>
+<div class="space-y-2.5">
+      
+      <a class="article block px-3 py-4  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="/articles/rcore_2024s_1/">
+        
+        
+        <h3 class="text-lg font-semibold mb-0.5">第一章：应用程序与基本执行环境 · rCore 2024S 随记</h3>
+        <div
+          class="text-sm  text-slate-500 dark:text-slate-400  line-clamp-2">
+          前言 实际实践参考的文档：rCore Tutorial Guide 2024S。
+第一章：应用程序与基本执行环境 引言 本章预期代码树：
+├── bootloader (内核依赖的运行在 M 特权级的 SBI 实现，本项目中我们使用 RustSBI) │ └── rustsbi-qemu.bin ├── os │ ├── Cargo.toml (cargo 项目配置文件) │ ├── Makefile │ └── src │ ├── console.rs (将打印字符的 SBI 接口进一步封装实现更加强大的格式化输出) │ ├── entry.asm (设置内核执行环境的的一段汇编代码) │ ├── lang_items.rs (需要我们提供给 Rust 编译器的一些语义项，目前包含内核 panic 时的处理逻辑) │ ├── linker.ld (控制内核内存布局的链接脚本以使内核运行在 qemu 虚拟机上) │ ├── logging.rs (为本项目实现了日志功能) │ ├── main.rs (内核主函数) │ └── sbi.rs (封装底层 SBI 实现提供的 SBI 接口) └── rust-toolchain (整个项目的工具链版本) cloc os ------------------------------------------------------------------------------- Language files blank comment code ------------------------------------------------------------------------------- Rust 5 25 6 155 make 1 11 4 34 Assembly 1 1 0 11 TOML 1 2 1 7 ------------------------------------------------------------------------------- SUM: 8 39 11 207 ------------------------------------------------------------------------------- 
+        </div>
+      </a>
+      
+      <a class="article block px-3 py-4  bg-slate-900 dark:bg-slate-700 text-slate-50 "
+        href="/articles/rcore_2024s_0/">
+        
+        
+        <h3 class="text-lg font-semibold mb-0.5">第零章：实验环境配置 · rCore 2024S 随记</h3>
+        <div
+          class="text-sm  text-slate-400  line-clamp-2">
+          前言 实际实践参考的文档：rCore Tutorial Guide 2024S。
+第零章：实验环境配置 OS 环境配置 OS环境 Ubuntu Server 22.04 amd64。
+Rust 开发环境配置 通过 rustup 安装的当前最新版工具链。
+curl https://sh.rustup.rs -sSf | sh Qemu 模拟器安装 参考文档，从源码安装 Qemu 7.0.0。
+sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev \ gawk build-essential bison flex texinfo gperf libtool patchutils bc \ zlib1g-dev libexpat-dev pkg-config libglib2.0-dev libpixman-1-dev git tmux python3 wget https://download.qemu.org/qemu-7.0.0.tar.xz # 解压 tar xvJf qemu-7.0.0.tar.xz # 编译安装并配置 RISC-V 支持 cd qemu-7.0.0 .
+        </div>
+      </a>
+      
+      <a class="article block px-3 py-4  hover:bg-slate-200 dark:hover:bg-slate-700 "
+        href="/articles/hello/">
+        
+        
+        <h3 class="text-lg font-semibold mb-0.5">Hello</h3>
+        <div
+          class="text-sm  text-slate-500 dark:text-slate-400  line-clamp-2">
+          Hello.
+        </div>
+      </a>
+      </div>
+    </section>
+
+  <div class="overflow-y-auto h-screen w-full">
+    <article class="px-6 py-20 w-full mx-auto prose lg:prose-lg h-fit dark:prose-invert prose-img:mx-auto">
+
+      
+      <h1 class="!mb-2">第零章：实验环境配置 · rCore 2024S 随记</h1>
+
+	  
+      <p class="text-sm text-slate-500 !mb-8"> Planted April 19, 2024
+		
+	  </p>
+      
+
+      
+
+      <h1 id="前言">前言</h1>
+<p>实际实践参考的文档：<a href="https://learningos.cn/rCore-Tutorial-Guide-2024S/"  target="_blank" rel="noopener" >rCore Tutorial Guide 2024S</a>。</p>
+<h1 id="第零章实验环境配置">第零章：实验环境配置</h1>
+<h2 id="os-环境配置">OS 环境配置</h2>
+<p>OS环境 Ubuntu Server 22.04 amd64。</p>
+<h2 id="rust-开发环境配置">Rust 开发环境配置</h2>
+<p>通过 rustup 安装的当前最新版工具链。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl https://sh.rustup.rs -sSf | sh
+</span></span></code></pre></div><h2 id="qemu-模拟器安装">Qemu 模拟器安装</h2>
+<p>参考文档，从源码安装 Qemu 7.0.0。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev libgmp-dev <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>              gawk build-essential bison flex texinfo gperf libtool patchutils bc <span style="color:#f1fa8c">\
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c"></span>              zlib1g-dev libexpat-dev pkg-config  libglib2.0-dev libpixman-1-dev git tmux python3
+</span></span><span style="display:flex;"><span>wget https://download.qemu.org/qemu-7.0.0.tar.xz
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># 解压</span>
+</span></span><span style="display:flex;"><span>tar xvJf qemu-7.0.0.tar.xz
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># 编译安装并配置 RISC-V 支持</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">cd</span> qemu-7.0.0
+</span></span><span style="display:flex;"><span>./configure --target-list<span style="color:#ff79c6">=</span>riscv64-softmmu,riscv64-linux-user
+</span></span><span style="display:flex;"><span>make -j<span style="color:#ff79c6">$(</span>nproc<span style="color:#ff79c6">)</span>
+</span></span></code></pre></div><h2 id="其他工具安装">其他工具安装</h2>
+<p>手动编译了 riscv-gnu-toolchain ，由此使得 riscv64-unknown-elf-gdb 可用。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#6272a4"># 构建依赖 </span>
+</span></span><span style="display:flex;"><span>sudo apt-get install autoconf automake autotools-dev curl python3 python3-pip libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev ninja-build git cmake libglib2.0-dev libslirp-dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># 尝试编译安装</span>
+</span></span><span style="display:flex;"><span>./configure --prefix<span style="color:#ff79c6">=</span>/opt/riscv
+</span></span><span style="display:flex;"><span>make linux
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># 编辑 bash profile</span>
+</span></span><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">echo</span> <span style="color:#f1fa8c">&#34;export PATH=&#39;/opt/riscv/bin:</span><span style="color:#8be9fd;font-style:italic">$PATH</span><span style="color:#f1fa8c">&#39;&#34;</span> &gt; ~/.bashrc
+</span></span></code></pre></div><h2 id="试运行-rcore-tutorial">试运行 rCore-Tutorial</h2>
+<p>得到如下输出：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#ff79c6">(</span>rustup target list | grep <span style="color:#f1fa8c">&#34;riscv64gc-unknown-none-elf (installed)&#34;</span><span style="color:#ff79c6">)</span> <span style="color:#ff79c6">||</span> rustup target add riscv64gc-unknown-none-elf
+</span></span><span style="display:flex;"><span>riscv64gc-unknown-none-elf <span style="color:#ff79c6">(</span>installed<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>cargo install cargo-binutils
+</span></span><span style="display:flex;"><span>    Updating crates.io index
+</span></span><span style="display:flex;"><span>     Ignored package <span style="color:#f1fa8c">`</span>cargo-binutils v0.3.6<span style="color:#f1fa8c">`</span> is already installed, use --force to override
+</span></span><span style="display:flex;"><span>rustup component add rust-src
+</span></span><span style="display:flex;"><span>info: component <span style="color:#f1fa8c">&#39;rust-src&#39;</span> is up to date
+</span></span><span style="display:flex;"><span>rustup component add llvm-tools-preview
+</span></span><span style="display:flex;"><span>info: component <span style="color:#f1fa8c">&#39;llvm-tools&#39;</span> <span style="color:#ff79c6">for</span> target <span style="color:#f1fa8c">&#39;x86_64-unknown-linux-gnu&#39;</span> is up to date
+</span></span><span style="display:flex;"><span>Platform: qemu
+</span></span><span style="display:flex;"><span>    Finished <span style="color:#f1fa8c">`</span>release<span style="color:#f1fa8c">`</span> profile <span style="color:#ff79c6">[</span>optimized + debuginfo<span style="color:#ff79c6">]</span> target<span style="color:#ff79c6">(</span>s<span style="color:#ff79c6">)</span> in 0.01s
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> RustSBI version 0.3.0-alpha.4, adapting to RISC-V SBI v1.0.0
+</span></span><span style="display:flex;"><span>.______       __    __      _______.___________.  _______..______   __
+</span></span><span style="display:flex;"><span>|   _  <span style="color:#f1fa8c">\ </span>    |  |  |  |    /       |           | /       <span style="color:#ff79c6">||</span>   _  <span style="color:#f1fa8c">\ </span>|  |
+</span></span><span style="display:flex;"><span>|  |_<span style="color:#ff79c6">)</span>  |    |  |  |  |   |   <span style="color:#ff79c6">(</span>----<span style="color:#f1fa8c">`</span>---|  |----<span style="color:#f1fa8c">`</span>|   <span style="color:#ff79c6">(</span>----<span style="color:#f1fa8c">`</span>|  |_<span style="color:#ff79c6">)</span>  <span style="color:#ff79c6">||</span>  |
+</span></span><span style="display:flex;"><span>|      /     |  |  |  |    <span style="color:#f1fa8c">\ </span>  <span style="color:#f1fa8c">\ </span>      |  |      <span style="color:#f1fa8c">\ </span>  <span style="color:#f1fa8c">\ </span>   |   _  &lt; |  |
+</span></span><span style="display:flex;"><span>|  |<span style="color:#f1fa8c">\ </span> <span style="color:#f1fa8c">\-</span>---.|  <span style="color:#f1fa8c">`</span>--&#39;  |.----<span style="color:#ff79c6">)</span>   |      |  |  .----<span style="color:#ff79c6">)</span>   |   |  |_<span style="color:#ff79c6">)</span>  <span style="color:#ff79c6">||</span>  |
+</span></span><span style="display:flex;"><span>| _| <span style="color:#f1fa8c">`</span>._____| <span style="color:#f1fa8c">\_</span>_____/ |_______/       |__|  |_______/    |______/ |__|
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> Implementation     : RustSBI-QEMU Version 0.2.0-alpha.2
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> Platform Name      : riscv-virtio,qemu
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> Platform SMP       : <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> Platform Memory    : 0x80000000..0x88000000
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> Boot HART          : <span style="color:#bd93f9">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> Device Tree Region : 0x87000000..0x87000ef2
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> Firmware Address   : 0x80000000
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> Supervisor Address : 0x80200000
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> pmp01: 0x00000000..0x80000000 <span style="color:#ff79c6">(</span>-wr<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> pmp02: 0x80000000..0x80200000 <span style="color:#ff79c6">(</span>---<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> pmp03: 0x80200000..0x88000000 <span style="color:#ff79c6">(</span>xwr<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>rustsbi<span style="color:#ff79c6">]</span> pmp04: 0x88000000..0x00000000 <span style="color:#ff79c6">(</span>-wr<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>kernel<span style="color:#ff79c6">]</span> Hello, world!
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>DEBUG<span style="color:#ff79c6">]</span> <span style="color:#ff79c6">[</span>kernel<span style="color:#ff79c6">]</span> .rodata <span style="color:#ff79c6">[</span>0x80202000, 0x80203000<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span> INFO<span style="color:#ff79c6">]</span> <span style="color:#ff79c6">[</span>kernel<span style="color:#ff79c6">]</span> .data <span style="color:#ff79c6">[</span>0x80203000, 0x80204000<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span> WARN<span style="color:#ff79c6">]</span> <span style="color:#ff79c6">[</span>kernel<span style="color:#ff79c6">]</span> boot_stack <span style="color:#8be9fd;font-style:italic">top</span><span style="color:#ff79c6">=</span><span style="color:#8be9fd;font-style:italic">bottom</span><span style="color:#ff79c6">=</span>0x80214000, <span style="color:#8be9fd;font-style:italic">lower_bound</span><span style="color:#ff79c6">=</span>0x80204000
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>ERROR<span style="color:#ff79c6">]</span> <span style="color:#ff79c6">[</span>kernel<span style="color:#ff79c6">]</span> .bss <span style="color:#ff79c6">[</span>0x80214000, 0x80215000<span style="color:#ff79c6">)</span>
+</span></span></code></pre></div>
+    </article>
+  </div>
+
+</div>
+
+
+  
+<script type="text/javascript" src="/main.js" defer></script>
+
+
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-PROPERTY_ID', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+</body>
+
+</html>
