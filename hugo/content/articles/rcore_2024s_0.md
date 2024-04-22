@@ -105,13 +105,98 @@ Platform: qemu
 
 > 在你日常使用的操作系统环境中安装并配置好实验环境。简要说明你碰到的问题/困难和解决方法。
 
+- 尝试在本机编译安装 riscv-gnu-toolchain 时提示缺少数个库，一一安装即可。编译命令： 先按源存储库 README.md 操作配置编译参数，然后执行 ```make linux```。最后在 bash profile 中将 /opt/riscv/bin 写入 PATH。
+
 > 在Linux环境下编写一个会产生异常的应用程序，并简要解释操作系统的处理结果。
+
+- 可以简单编写一个会导致 SIGFPE 的程序。 ```int main(){return 1/0;}```
+- 操作系统会通过中断捕获这个错误，根据不同的配置，可能执行 core dump 或 suspend、kill 掉进程。
 
 > 在Linux环境下编写一个可以睡眠5秒后打印出一个字符串，并把字符串内容存入一个文件中的应用程序A。(基于C或Rust语言)
 
+```rust
+use std::fs::File;
+use std::io::Write;
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    thread::sleep(Duration::from_secs(5));
+
+    let message = "Hello, World!";
+    println!("{}", message);
+
+    let mut file = File::create("output.txt").expect("Failed to create file");
+    file.write_all(message.as_bytes()).expect("Failed to write to file");
+}
+```
+
+- ~~它使用了标准库，可能没法在裸机执行。~~
+
 > 在Linux环境下编写一个应用程序B，简要说明此程序能够体现操作系统的并发性、异步性、共享性和持久性。(基于C或Rust语言)
 
+- 支持多线程：并发性。
+- 使用了异步文件API：异步性。（有点扯XD）
+- 共享性：通过 Mutex 管理线程间共享数据。
+- 持久性：文件存储，特别特别持久。
+
+```rust
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
+use std::fs::OpenOptions;
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
+
+fn main() {
+    // create multiple threads and execute tasks asynchronously
+    let thread_handles: Vec<_> = (0..5)
+        .map(|i| {
+            thread::spawn(move || {
+                println!("Thread {} started", i);
+                thread::sleep(Duration::from_secs(i as u64));
+
+                // access shared variable using a mutex
+                let shared_data = Arc::new(Mutex::new(0));
+                { // using lock here 
+                    let mut data = shared_data.lock().unwrap();
+                    *data += i;
+                    println!("Thread {} updated shared data: {}", i, *data);
+                }
+
+                // asynchrony and persistence: write data to a file
+                let file_path = format!("output_{}.txt", i);
+                let mut file = File::create(file_path).await.unwrap();
+                let message = format!("Hello from thread {}", i);
+                file.write_all(message.as_bytes()).await.unwrap();
+
+                println!("Thread {} finished", i);
+            })
+        })
+        .collect();
+
+    for handle in thread_handles {
+        handle.join().unwrap();
+    }
+}
+```
+
 > 注： 在类Linux环境下编写尝试用GDB等调试工具调试应用程序A，能够设置断点，单步执行，显示变量信息。
+
+- cargo project 为目标文件加入符号很简单，只需要配置 ```Cargo.toml```。
+
+```toml
+[profile.dev]
+debug = true
+```
+
+- rustc 直接编译则是在命令行的文件前加入 ```--debug``` 参数。
+
+- 然后启动 gdb，执行 ```gdb <可执行文件名>``` 即可像 C++ 程序一样进行调试。
+
+- b / breakpoint 断点， n / next 下一步， c / continue 跳到下一个断点， print / watch 监视变量。
+
+- 对于应用程序 A，可以执行 b 10，然后 r。这样，gdb 应该在五秒后捕获断点。此时执行 n，将会看到 Hello World 的输出。
 
 ### 问答题
 

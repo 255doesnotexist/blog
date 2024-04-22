@@ -34,13 +34,13 @@
   <meta itemprop="name" content="第零章：实验环境配置 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 零"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="367"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="657"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 
   <meta itemprop="name" content="第零章：实验环境配置 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 零"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="367"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="657"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 </head><body class="flex relative h-full min-h-screen"><aside
   class="will-change-transform transform transition-transform -translate-x-full absolute top-0 left-0 md:relative md:translate-x-0 w-3/4 md:basis-60 h-full min-h-screen p-3 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col gap-2.5 z-20 sidebar flex-shrink-0">
@@ -454,7 +454,184 @@ sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev lib
 </span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span> INFO<span style="color:#ff79c6">]</span> <span style="color:#ff79c6">[</span>kernel<span style="color:#ff79c6">]</span> .data <span style="color:#ff79c6">[</span>0x80203000, 0x80204000<span style="color:#ff79c6">)</span>
 </span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span> WARN<span style="color:#ff79c6">]</span> <span style="color:#ff79c6">[</span>kernel<span style="color:#ff79c6">]</span> boot_stack <span style="color:#8be9fd;font-style:italic">top</span><span style="color:#ff79c6">=</span><span style="color:#8be9fd;font-style:italic">bottom</span><span style="color:#ff79c6">=</span>0x80214000, <span style="color:#8be9fd;font-style:italic">lower_bound</span><span style="color:#ff79c6">=</span>0x80204000
 </span></span><span style="display:flex;"><span><span style="color:#ff79c6">[</span>ERROR<span style="color:#ff79c6">]</span> <span style="color:#ff79c6">[</span>kernel<span style="color:#ff79c6">]</span> .bss <span style="color:#ff79c6">[</span>0x80214000, 0x80215000<span style="color:#ff79c6">)</span>
-</span></span></code></pre></div>
+</span></span></code></pre></div><h2 id="习题试做">习题试做</h2>
+<h3 id="编程题">编程题</h3>
+<blockquote>
+<p>在你日常使用的操作系统环境中安装并配置好实验环境。简要说明你碰到的问题/困难和解决方法。</p>
+</blockquote>
+<ul>
+<li>尝试在本机编译安装 riscv-gnu-toolchain 时提示缺少数个库，一一安装即可。编译命令： 先按源存储库 README.md 操作配置编译参数，然后执行 <code>make linux</code>。最后在 bash profile 中将 /opt/riscv/bin 写入 PATH。</li>
+</ul>
+<blockquote>
+<p>在Linux环境下编写一个会产生异常的应用程序，并简要解释操作系统的处理结果。</p>
+</blockquote>
+<ul>
+<li>可以简单编写一个会导致 SIGFPE 的程序。 <code>int main(){return 1/0;}</code></li>
+<li>操作系统会通过中断捕获这个错误，根据不同的配置，可能执行 core dump 或 suspend、kill 掉进程。</li>
+</ul>
+<blockquote>
+<p>在Linux环境下编写一个可以睡眠5秒后打印出一个字符串，并把字符串内容存入一个文件中的应用程序A。(基于C或Rust语言)</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#ff79c6">use</span> std::fs::File;
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">use</span> std::io::Write;
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">use</span> std::thread;
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">use</span> std::time::Duration;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    thread::sleep(Duration::from_secs(<span style="color:#bd93f9">5</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> message <span style="color:#ff79c6">=</span> <span style="color:#f1fa8c">&#34;Hello, World!&#34;</span>;
+</span></span><span style="display:flex;"><span>    println!(<span style="color:#f1fa8c">&#34;</span><span style="color:#f1fa8c">{}</span><span style="color:#f1fa8c">&#34;</span>, message);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#ff79c6">mut</span> file <span style="color:#ff79c6">=</span> File::create(<span style="color:#f1fa8c">&#34;output.txt&#34;</span>).expect(<span style="color:#f1fa8c">&#34;Failed to create file&#34;</span>);
+</span></span><span style="display:flex;"><span>    file.write_all(message.as_bytes()).expect(<span style="color:#f1fa8c">&#34;Failed to write to file&#34;</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ul>
+<li><del>它使用了标准库，可能没法在裸机执行。</del></li>
+</ul>
+<blockquote>
+<p>在Linux环境下编写一个应用程序B，简要说明此程序能够体现操作系统的并发性、异步性、共享性和持久性。(基于C或Rust语言)</p>
+</blockquote>
+<ul>
+<li>支持多线程：并发性。</li>
+<li>使用了异步文件API：异步性。（有点扯XD）</li>
+<li>共享性：通过 Mutex 管理线程间共享数据。</li>
+<li>持久性：文件存储，特别特别持久。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#ff79c6">use</span> std::sync::{Arc, Mutex};
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">use</span> std::thread;
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">use</span> std::time::Duration;
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">use</span> std::fs::OpenOptions;
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">use</span> tokio::fs::File;
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">use</span> tokio::io::AsyncWriteExt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#6272a4">// create multiple threads and execute tasks asynchronously
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>    <span style="color:#8be9fd;font-style:italic">let</span> thread_handles: <span style="color:#8be9fd;font-style:italic">Vec</span><span style="color:#ff79c6">&lt;</span>_<span style="color:#ff79c6">&gt;</span> <span style="color:#ff79c6">=</span> (<span style="color:#bd93f9">0</span><span style="color:#ff79c6">..</span><span style="color:#bd93f9">5</span>)
+</span></span><span style="display:flex;"><span>        .map(<span style="color:#ff79c6">|</span>i<span style="color:#ff79c6">|</span> {
+</span></span><span style="display:flex;"><span>            thread::spawn(<span style="color:#ff79c6">move</span> <span style="color:#ff79c6">||</span> {
+</span></span><span style="display:flex;"><span>                println!(<span style="color:#f1fa8c">&#34;Thread </span><span style="color:#f1fa8c">{}</span><span style="color:#f1fa8c"> started&#34;</span>, i);
+</span></span><span style="display:flex;"><span>                thread::sleep(Duration::from_secs(i <span style="color:#ff79c6">as</span> <span style="color:#8be9fd">u64</span>));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// access shared variable using a mutex
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                <span style="color:#8be9fd;font-style:italic">let</span> shared_data <span style="color:#ff79c6">=</span> Arc::new(Mutex::new(<span style="color:#bd93f9">0</span>));
+</span></span><span style="display:flex;"><span>                { <span style="color:#6272a4">// using lock here 
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                    <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#ff79c6">mut</span> data <span style="color:#ff79c6">=</span> shared_data.lock().unwrap();
+</span></span><span style="display:flex;"><span>                    <span style="color:#ff79c6">*</span>data <span style="color:#ff79c6">+=</span> i;
+</span></span><span style="display:flex;"><span>                    println!(<span style="color:#f1fa8c">&#34;Thread </span><span style="color:#f1fa8c">{}</span><span style="color:#f1fa8c"> updated shared data: </span><span style="color:#f1fa8c">{}</span><span style="color:#f1fa8c">&#34;</span>, i, <span style="color:#ff79c6">*</span>data);
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#6272a4">// asynchrony and persistence: write data to a file
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>                <span style="color:#8be9fd;font-style:italic">let</span> file_path <span style="color:#ff79c6">=</span> format!(<span style="color:#f1fa8c">&#34;output_</span><span style="color:#f1fa8c">{}</span><span style="color:#f1fa8c">.txt&#34;</span>, i);
+</span></span><span style="display:flex;"><span>                <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#ff79c6">mut</span> file <span style="color:#ff79c6">=</span> File::create(file_path).<span style="color:#ff79c6">await</span>.unwrap();
+</span></span><span style="display:flex;"><span>                <span style="color:#8be9fd;font-style:italic">let</span> message <span style="color:#ff79c6">=</span> format!(<span style="color:#f1fa8c">&#34;Hello from thread </span><span style="color:#f1fa8c">{}</span><span style="color:#f1fa8c">&#34;</span>, i);
+</span></span><span style="display:flex;"><span>                file.write_all(message.as_bytes()).<span style="color:#ff79c6">await</span>.unwrap();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                println!(<span style="color:#f1fa8c">&#34;Thread </span><span style="color:#f1fa8c">{}</span><span style="color:#f1fa8c"> finished&#34;</span>, i);
+</span></span><span style="display:flex;"><span>            })
+</span></span><span style="display:flex;"><span>        })
+</span></span><span style="display:flex;"><span>        .collect();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">for</span> handle <span style="color:#ff79c6">in</span> thread_handles {
+</span></span><span style="display:flex;"><span>        handle.join().unwrap();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><blockquote>
+<p>注： 在类Linux环境下编写尝试用GDB等调试工具调试应用程序A，能够设置断点，单步执行，显示变量信息。</p>
+</blockquote>
+<ul>
+<li>cargo project 为目标文件加入符号很简单，只需要配置 <code>Cargo.toml</code>。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-toml" data-lang="toml"><span style="display:flex;"><span>[profile.dev]
+</span></span><span style="display:flex;"><span>debug = <span style="color:#ff79c6">true</span>
+</span></span></code></pre></div><ul>
+<li>
+<p>rustc 直接编译则是在命令行的文件前加入 <code>--debug</code> 参数。</p>
+</li>
+<li>
+<p>然后启动 gdb，执行 <code>gdb &lt;可执行文件名&gt;</code> 即可像 C++ 程序一样进行调试。</p>
+</li>
+<li>
+<p>b / breakpoint 断点， n / next 下一步， c / continue 跳到下一个断点， print / watch 监视变量。</p>
+</li>
+<li>
+<p>对于应用程序 A，可以执行 b 10，然后 r。这样，gdb 应该在五秒后捕获断点。此时执行 n，将会看到 Hello World 的输出。</p>
+</li>
+</ul>
+<h3 id="问答题">问答题</h3>
+<blockquote>
+<p>什么是操作系统？操作系统的主要目标是什么？</p>
+</blockquote>
+<ul>
+<li>操作系统是介于底层硬件实现和上层用户软件之间的一层系统应用软件。其主要目标是提供稳定的ABI、syscall，以期服务上层应用程序。其中ABI作为二进制接口，与应用程序接口API不同。ABI设计时就以可被多种语言调用为目标。</li>
+</ul>
+<blockquote>
+<p>面向服务器的操作系统与面向手机的操作系统在功能上有何异同？</p>
+</blockquote>
+<ul>
+<li>
+<p>面向服务器的操作系统需要保障其运行服务的稳定性、可用性，不能随意杀死进程、需要合理分配时间片资源，同时也需要支持更大的内存。面向手机的操作系统则强调用户界面而非后台服务的流畅性，例如iOS中，动画优先级是远大于后台服务的。为了保证流畅，手机操作系统会通过墓碑机制、Doze机制对后台应用进行休眠，这一点与服务器系统大不相同。</p>
+</li>
+<li>
+<p>他们的共同点：现代的服务器操作系统和手机操作系统在基本的抽象接口设计上基本一致，进程、线程、异步的概念一致。同样支持内存分页（智慧运存「偷笑」）、多处理器、超线程（麒麟9000S）。</p>
+</li>
+</ul>
+<blockquote>
+<p>对于目前的手机或桌面操作系统而言，操作系统是否应该包括网络浏览器？请说明理由。</p>
+</blockquote>
+<ul>
+<li>
+<p>我认为，从传统的目光看，目前的手机、桌面操作系统均不包括网络浏览器。网络浏览器应当属于其上运行的一个用户级软件。它既无直接访问硬件中断的能力，也不管理硬件级内存、实现驱动。因此不算是操作系统。</p>
+</li>
+<li>
+<p>但换个角度看，网络浏览器可以被抽象得看作是一台完整的 JavaScript Machine。在这台机器上运行的 DOM 渲染部分是它的输出、捕获的鼠标键盘重定向是它的输入、V8 引擎是它的处理器，符合基本冯诺依曼机器的定义。V8 引擎中管理内存、线程的部分，实质上与操作系统相关的代码及其类似。如果近似地看，网络浏览器和操作系统的差别也许并不大呢！</p>
+</li>
+</ul>
+<blockquote>
+<p>操作系统的核心抽象有哪些？它们应对的对象是啥？</p>
+</blockquote>
+<ul>
+<li>核心抽象：进程、线程、地址空间、文件、虚拟内存、设备。进程是对运行着的应用程序的抽象；线程是对应用程序中更小的任务片的抽象；地址空间是用来隔离应用程序使用内存的一种保护手段；虚拟内存是通过映射手段保证应用程序无感访问操作系统管理的各类介质的内存空间的一种方式；设备是操作系统管理的外围设备，通常通过中断或轮询与操作系统沟通。</li>
+</ul>
+<blockquote>
+<p>操作系统与应用程序之间通过什么来进行互操作和数据交换？</p>
+</blockquote>
+<ul>
+<li>ABI，应用程序二进制接口。</li>
+</ul>
+<blockquote>
+<p>操作系统的特征是什么？请结合你日常使用的操作系统的具体运行情况来进一步说明操作系统的特征。</p>
+</blockquote>
+<ul>
+<li>操作系统（OS）是一个软件，它帮助用户和应用程序使用和管理计算机的资源。操作系统可能对最终用户不可见，但它控制着嵌入式设备、更通用的系统（如智能手机、台式计算机和服务器）以及巨型机等各种计算机系统。</li>
+</ul>
+<blockquote>
+<p>请说明基于C语言应用的执行环境与基于Java语言应用的执行环境的异同。</p>
+</blockquote>
+<ul>
+<li>同：C 语言应用需要各类 libc 用作执行库、Java 需要 JVM 作为执行环境。</li>
+<li>异：C 直接编译到目标平台的机器码，Java 编译到 Universal Bytecode。</li>
+</ul>
+<blockquote>
+<p>请简要列举操作系统的系统调用的作用，以及简要说明与程序执行、内存分配、文件读写相关的Linux系统调用的大致接口和含义。</p>
+</blockquote>
+<ul>
+<li>30 个 syscall 的作用可见于 <a href="https://rcore-os.cn/rCore-Tutorial-Book-v3/chapter0/2os-interface.html#id2"  target="_blank" rel="noopener" >这一章节的内容</a> 。</li>
+<li>我的意思是，既然可以查文档，就没必要把它背下来。</li>
+</ul>
+<blockquote>
+<p>以你编写的可以睡眠5秒后打印出一个字符串的应用程序A为例，说明什么是控制流？什么是异常控制流？什么是进程、地址空间和文件？并简要描述操作系统是如何支持这个应用程序完成其工作并结束的。</p>
+</blockquote>
+<ul>
+<li>还没写，明天再说。</li>
+</ul>
+<blockquote>
+<p>请简要描述支持单个应用的OS、批处理OS、多道程序OS、分时共享OS的特点。</p>
+</blockquote>
+<ul>
+<li>单个应用的 OS 只能运行单个应用便结束。批处理 OS 运行完一个程序后会按照既定安排运行下一个程序。多道程序 OS 可以以指令为分界线切换运行多个程序。分时共享 OS 可以以时间片为单位进行上下文切换运行多个程序。</li>
+</ul>
+
     </article>
   </div>
 
