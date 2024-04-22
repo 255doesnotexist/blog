@@ -81,7 +81,7 @@ Hello, world!
 
 ### 理解应用程序执行环境
 
-![](https://learningos.cn/rCore-Tutorial-Guide-2024S/_images/app-software-stack.png)
+![![这有一张图](https://rcore-os.cn/rCore-Tutorial-Book-v3/_images/app-software-stack.png)](https://learningos.cn/rCore-Tutorial-Guide-2024S/_images/app-software-stack.png)
 
 > 我们的应用程序通过调用标准库或第三方库提供的接口，仅需少量源代码就能完成复杂的功能； Hello, world! 程序调用的 println! 宏就是由 Rust 标准库 std 和 GNU Libc 等提供的。 这些库属于应用程序的 执行环境 (Execution Environment)，而它们的实现又依赖于操作系统提供的系统调用。
 
