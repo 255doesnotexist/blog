@@ -45,3 +45,42 @@ SUM:                             8             39             11            207
 -------------------------------------------------------------------------------
 ```
 
+## 应用程序执行环境与平台支持
+
+### 执行应用程序
+
+按文档要求，我们切回主分支 main。执行命令。
+
+```bash
+cargo new os
+```
+
+```bash
+$ tree
+.
+├── os
+│   ├── Cargo.lock
+│   ├── Cargo.toml
+│   └── src
+│       └── main.rs
+└── README.md
+
+3 directories, 4 files
+```
+
+```bash
+$ cd os/
+$ cargo run
+   Compiling os v0.1.0 (/home/ezra/rCore-Tutorial-Code-2024S/os)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.32s
+     Running `target/debug/os`
+Hello, world!
+```
+
+> 我们在屏幕上看到了一行 Hello, world! ，但为了打印出 Hello, world!，我们需要的不止几行源代码。
+
+### 理解应用程序执行环境
+
+![](https://learningos.cn/rCore-Tutorial-Guide-2024S/_images/app-software-stack.png)
+
+> 我们的应用程序通过调用标准库或第三方库提供的接口，仅需少量源代码就能完成复杂的功能； Hello, world! 程序调用的 println! 宏就是由 Rust 标准库 std 和 GNU Libc 等提供的。 这些库属于应用程序的 执行环境 (Execution Environment)，而它们的实现又依赖于操作系统提供的系统调用。

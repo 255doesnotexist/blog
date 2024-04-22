@@ -34,13 +34,13 @@
   <meta itemprop="name" content="第一章：应用程序与基本执行环境 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 一"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="115"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="191"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 
   <meta itemprop="name" content="第一章：应用程序与基本执行环境 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 一"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="115"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="191"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 </head><body class="flex relative h-full min-h-screen"><aside
   class="will-change-transform transform transition-transform -translate-x-full absolute top-0 left-0 md:relative md:translate-x-0 w-3/4 md:basis-60 h-full min-h-screen p-3 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col gap-2.5 z-20 sidebar flex-shrink-0">
@@ -417,7 +417,35 @@ sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev lib
 </span></span><span style="display:flex;"><span>-------------------------------------------------------------------------------
 </span></span><span style="display:flex;"><span>SUM:                             <span style="color:#bd93f9">8</span>             <span style="color:#bd93f9">39</span>             <span style="color:#bd93f9">11</span>            <span style="color:#bd93f9">207</span>
 </span></span><span style="display:flex;"><span>-------------------------------------------------------------------------------
-</span></span></code></pre></div>
+</span></span></code></pre></div><h2 id="应用程序执行环境与平台支持">应用程序执行环境与平台支持</h2>
+<h3 id="执行应用程序">执行应用程序</h3>
+<p>按文档要求，我们切回主分支 main。执行命令。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cargo new os
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ tree
+</span></span><span style="display:flex;"><span>.
+</span></span><span style="display:flex;"><span>├── os
+</span></span><span style="display:flex;"><span>│   ├── Cargo.lock
+</span></span><span style="display:flex;"><span>│   ├── Cargo.toml
+</span></span><span style="display:flex;"><span>│   └── src
+</span></span><span style="display:flex;"><span>│       └── main.rs
+</span></span><span style="display:flex;"><span>└── README.md
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">3</span> directories, <span style="color:#bd93f9">4</span> files
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ <span style="color:#8be9fd;font-style:italic">cd</span> os/
+</span></span><span style="display:flex;"><span>$ cargo run
+</span></span><span style="display:flex;"><span>   Compiling os v0.1.0 <span style="color:#ff79c6">(</span>/home/ezra/rCore-Tutorial-Code-2024S/os<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>    Finished dev <span style="color:#ff79c6">[</span>unoptimized + debuginfo<span style="color:#ff79c6">]</span> target<span style="color:#ff79c6">(</span>s<span style="color:#ff79c6">)</span> in 0.32s
+</span></span><span style="display:flex;"><span>     Running <span style="color:#f1fa8c">`</span>target/debug/os<span style="color:#f1fa8c">`</span>
+</span></span><span style="display:flex;"><span>Hello, world!
+</span></span></code></pre></div><blockquote>
+<p>我们在屏幕上看到了一行 Hello, world! ，但为了打印出 Hello, world!，我们需要的不止几行源代码。</p>
+</blockquote>
+<h3 id="理解应用程序执行环境">理解应用程序执行环境</h3>
+<p><img src="https://learningos.cn/rCore-Tutorial-Guide-2024S/_images/app-software-stack.png" alt=""></p>
+<blockquote>
+<p>我们的应用程序通过调用标准库或第三方库提供的接口，仅需少量源代码就能完成复杂的功能； Hello, world! 程序调用的 println! 宏就是由 Rust 标准库 std 和 GNU Libc 等提供的。 这些库属于应用程序的 执行环境 (Execution Environment)，而它们的实现又依赖于操作系统提供的系统调用。</p>
+</blockquote>
+
     </article>
   </div>
 
