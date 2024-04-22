@@ -34,13 +34,13 @@
   <meta itemprop="name" content="第一章：应用程序与基本执行环境 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 一"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="191"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="541"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 
   <meta itemprop="name" content="第一章：应用程序与基本执行环境 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 一"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="191"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="541"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 </head><body class="flex relative h-full min-h-screen"><aside
   class="will-change-transform transform transition-transform -translate-x-full absolute top-0 left-0 md:relative md:translate-x-0 w-3/4 md:basis-60 h-full min-h-screen p-3 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col gap-2.5 z-20 sidebar flex-shrink-0">
@@ -445,7 +445,130 @@ sudo apt install autoconf automake autotools-dev curl libmpc-dev libmpfr-dev lib
 <blockquote>
 <p>我们的应用程序通过调用标准库或第三方库提供的接口，仅需少量源代码就能完成复杂的功能； Hello, world! 程序调用的 println! 宏就是由 Rust 标准库 std 和 GNU Libc 等提供的。 这些库属于应用程序的 执行环境 (Execution Environment)，而它们的实现又依赖于操作系统提供的系统调用。</p>
 </blockquote>
-
+<ul>
+<li>所以我们需要剥离标准库，才能在裸机上执行。操作系统则提供关于标准库的系统调用。</li>
+</ul>
+<h3 id="平台与目标三元组">平台与目标三元组</h3>
+<blockquote>
+<p>编译器在编译、链接得到可执行文件时需要知道，程序要在哪个 平台 (Platform) 上运行， 目标三元组 (Target Triplet) 描述了目标平台的 CPU 指令集、操作系统类型和标准运行时库。</p>
+</blockquote>
+<blockquote>
+<p>我们研究一下现在 Hello, world! 程序的目标三元组是什么：</p>
+</blockquote>
+<ul>
+<li>在我的环境下：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ rustc --verbose --version
+</span></span><span style="display:flex;"><span>rustc 1.77.2 <span style="color:#ff79c6">(</span>25ef9e3d8 2024-04-09<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>binary: rustc
+</span></span><span style="display:flex;"><span>commit-hash: 25ef9e3d85d934b27d9dada2f9dd52b1dc63bb04
+</span></span><span style="display:flex;"><span>commit-date: 2024-04-09
+</span></span><span style="display:flex;"><span>host: x86_64-unknown-linux-gnu
+</span></span><span style="display:flex;"><span>release: 1.77.2
+</span></span><span style="display:flex;"><span>LLVM version: 17.0.6
+</span></span></code></pre></div><ul>
+<li>也就是 x86_64 (amd64)、Linux、GNU glibc。</li>
+</ul>
+<blockquote>
+<p>接下来，我们希望把 Hello, world! 移植到 RICV 目标平台 riscv64gc-unknown-none-elf 上运行。</p>
+</blockquote>
+<ul>
+<li>注意，接下来没有标准库可供调用。</li>
+</ul>
+<h3 id="修改目标平台">修改目标平台</h3>
+<blockquote>
+<p>将程序的目标平台换成 riscv64gc-unknown-none-elf，试试看会发生什么：</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ cargo run --target riscv64gc-unknown-none-elf
+</span></span><span style="display:flex;"><span>   Compiling os v0.1.0 <span style="color:#ff79c6">(</span>/home/ezra/rCore-Tutorial-Code-2024S/os<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>error<span style="color:#ff79c6">[</span>E0463<span style="color:#ff79c6">]</span>: can&#39;t find crate <span style="color:#ff79c6">for</span> <span style="color:#f1fa8c">`</span>std<span style="color:#f1fa8c">`</span>
+</span></span><span style="display:flex;"><span>  |
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">=</span> note: the <span style="color:#f1fa8c">`</span>riscv64gc-unknown-none-elf<span style="color:#f1fa8c">`</span> target may not be <span style="color:#8be9fd;font-style:italic">installed</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">=</span> help: consider downloading the target with <span style="color:#f1fa8c">`</span>rustup target add riscv64gc-unknown-none-elf<span style="color:#f1fa8c">`</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>error: cannot find macro <span style="color:#f1fa8c">`</span>println<span style="color:#f1fa8c">`</span> in this scope
+</span></span><span style="display:flex;"><span> --&gt; src/main.rs:2:5
+</span></span><span style="display:flex;"><span>  |
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">2</span> |     println!<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;Hello, world!&#34;</span><span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  |     ^^^^^^^
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>error: requires <span style="color:#f1fa8c">`</span>sized<span style="color:#f1fa8c">`</span> lang_item
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>For more information about this error, try <span style="color:#f1fa8c">`</span>rustc --explain E0463<span style="color:#f1fa8c">`</span>.
+</span></span><span style="display:flex;"><span>error: could not compile <span style="color:#f1fa8c">`</span>os<span style="color:#f1fa8c">`</span> <span style="color:#ff79c6">(</span>bin <span style="color:#f1fa8c">&#34;os&#34;</span><span style="color:#ff79c6">)</span> due to <span style="color:#bd93f9">3</span> previous errors
+</span></span></code></pre></div><blockquote>
+<p>报错的原因是目标平台上确实没有 Rust 标准库 std，也不存在任何受 OS 支持的系统调用。 这样的平台被我们称为 裸机平台 (bare-metal)。</p>
+</blockquote>
+<blockquote>
+<p>幸运的是，除了 std 之外，Rust 还有一个不需要任何操作系统支持的核心库 core， 它包含了 Rust 语言相当一部分核心机制，可以满足本门课程的需求。 有很多第三方库也不依赖标准库 std，而仅仅依赖核心库 core。</p>
+</blockquote>
+<blockquote>
+<p>为了以裸机平台为目标编译程序，我们要将对标准库 std 的引用换成核心库 core。</p>
+</blockquote>
+<h2 id="移除标准库依赖">移除标准库依赖</h2>
+<ul>
+<li>编辑 os/.cargo/config 文件，加入以下内容：</li>
+</ul>
+<pre tabindex="0"><code class="language-conf" data-lang="conf">[build]
+target = &#34;riscv64gc-unknown-none-elf&#34;
+</code></pre><ul>
+<li>这将会持久化设定目标平台的设定为 riscv64gc。</li>
+</ul>
+<blockquote>
+<p>这将使 cargo 工具在 os 目录下默认会使用 riscv64gc-unknown-none-elf 作为目标平台。 这种编译器运行的平台（x86_64）与可执行文件运行的目标平台不同的情况，称为 交叉编译 (Cross Compile)。</p>
+</blockquote>
+<h3 id="移除-println-宏">移除 println! 宏</h3>
+<blockquote>
+<p>我们在 main.rs 的开头加上一行 #![no_std]， 告诉 Rust 编译器不使用 Rust 标准库 std 转而使用核心库 core。重新编译，报错如下：</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ cargo run
+</span></span><span style="display:flex;"><span>   Compiling os v0.1.0 <span style="color:#ff79c6">(</span>/home/ezra/rCore-Tutorial-Code-2024S/os<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>error<span style="color:#ff79c6">[</span>E0463<span style="color:#ff79c6">]</span>: can<span style="color:#f1fa8c">&#39;t find crate for `core`
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  |
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  = note: the `riscv64gc-unknown-none-elf` target may not be installed
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">  = help: consider downloading the target with `rustup target add riscv64gc-unknown-none-elf`
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">
+</span></span></span><span style="display:flex;"><span><span style="color:#f1fa8c">error[E0463]: can&#39;</span>t find crate <span style="color:#ff79c6">for</span> <span style="color:#f1fa8c">`</span>compiler_builtins<span style="color:#f1fa8c">`</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>error: cannot find macro <span style="color:#f1fa8c">`</span>println<span style="color:#f1fa8c">`</span> in this scope
+</span></span><span style="display:flex;"><span> --&gt; src/main.rs:3:5
+</span></span><span style="display:flex;"><span>  |
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">3</span> |     println!<span style="color:#ff79c6">(</span><span style="color:#f1fa8c">&#34;Hello, world!&#34;</span><span style="color:#ff79c6">)</span>;
+</span></span><span style="display:flex;"><span>  |     ^^^^^^^
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>error: requires <span style="color:#f1fa8c">`</span>sized<span style="color:#f1fa8c">`</span> lang_item
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>For more information about this error, try <span style="color:#f1fa8c">`</span>rustc --explain E0463<span style="color:#f1fa8c">`</span>.
+</span></span><span style="display:flex;"><span>error: could not compile <span style="color:#f1fa8c">`</span>os<span style="color:#f1fa8c">`</span> <span style="color:#ff79c6">(</span>bin <span style="color:#f1fa8c">&#34;os&#34;</span><span style="color:#ff79c6">)</span> due to <span style="color:#bd93f9">4</span> previous errors
+</span></span></code></pre></div><ul>
+<li>注意到环境配置似乎有些问题，没有安装 riscv64gc-unknown-none-elf 的 target。解决方案如下：</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ rustup target add riscv64gc-unknown-none-elf
+</span></span></code></pre></div><blockquote>
+<p>println! 宏是由标准库 std 提供的，且会使用到一个名为 write 的系统调用。 无论如何，我们先将这行代码注释掉。</p>
+</blockquote>
+<h3 id="提供语义项-panic_handler">提供语义项 panic_handler</h3>
+<blockquote>
+<p>标准库 std 提供了 Rust 错误处理函数 #[panic_handler]，其大致功能是打印出错位置和原因并杀死当前应用。 但核心库 core 并没有提供这项功能，得靠我们自己实现。</p>
+</blockquote>
+<ul>
+<li>例子：移除了 println! 后，依然存在以下错误。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ cargo run
+</span></span><span style="display:flex;"><span>   Compiling os v0.1.0 <span style="color:#ff79c6">(</span>/home/ezra/rCore-Tutorial-Code-2024S/os<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>error: <span style="color:#f1fa8c">`</span><span style="color:#6272a4">#[panic_handler]` function required, but not found</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>error: could not compile <span style="color:#f1fa8c">`</span>os<span style="color:#f1fa8c">`</span> <span style="color:#ff79c6">(</span>bin <span style="color:#f1fa8c">&#34;os&#34;</span><span style="color:#ff79c6">)</span> due to <span style="color:#bd93f9">1</span> previous error
+</span></span></code></pre></div><blockquote>
+<p>新建一个子模块 os/src/lang_items.rs，在里面编写 panic 处理函数，通过标记 #[panic_handler] 告知编译器采用我们的实现：</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#ff79c6">use</span> core::panic::PanicInfo;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">#[panic_handler]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">panic</span>(_info: <span style="color:#ff79c6">&amp;</span><span style="color:#50fa7b">PanicInfo</span>) -&gt; <span style="color:#ff79c6">!</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">loop</span> {}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
     </article>
   </div>
 
