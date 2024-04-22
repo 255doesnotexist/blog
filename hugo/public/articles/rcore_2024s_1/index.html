@@ -34,13 +34,13 @@
   <meta itemprop="name" content="第一章：应用程序与基本执行环境 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 一"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="851"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="877"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 
   <meta itemprop="name" content="第一章：应用程序与基本执行环境 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 一"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="851"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="877"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 </head><body class="flex relative h-full min-h-screen"><aside
   class="will-change-transform transform transition-transform -translate-x-full absolute top-0 left-0 md:relative md:translate-x-0 w-3/4 md:basis-60 h-full min-h-screen p-3 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col gap-2.5 z-20 sidebar flex-shrink-0">
@@ -680,6 +680,27 @@ target = &#34;riscv64gc-unknown-none-elf&#34;
 <blockquote>
 <p>从下一节开始，我们将着手实现本节移除的、由用户态执行环境提供的功能。</p>
 </blockquote>
+<h2 id="构建用户态执行环境">构建用户态执行环境</h2>
+<h3 id="用户态最小化执行环境">用户态最小化执行环境</h3>
+<h4 id="执行环境初始化">执行环境初始化</h4>
+<blockquote>
+<p>首先我们要给 Rust 编译器编译器提供入口函数 _start() ， 在 main.rs 中添加如下内容：</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#ff79c6">#[no_mangle]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">extern</span> <span style="color:#f1fa8c">&#34;C&#34;</span> <span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">_start</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">loop</span>{};
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ul>
+<li>
+<p>和 C、C++ 很像，在程序启动前都存在一个最初的入口点。</p>
+</li>
+<li>
+<p>通过入口点，我们可以为用户态初始化一些必要的资源。</p>
+</li>
+<li>
+<p>先写到这，形势与政策课 iYanDa 校园网不好，连不上实验实例了。下节课再写。</p>
+</li>
+</ul>
 
     </article>
   </div>
