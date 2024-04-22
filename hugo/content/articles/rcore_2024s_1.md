@@ -213,3 +213,45 @@ fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 ```
+
+- 不要忘了在 main.rs 里引用你写的 panic。 ```mod lang_items;``` 即可。
+
+### 移除 main 函数
+
+- 接下来重新编译，提示在入口点又出现了问题。
+
+```bash
+$ cargo run
+   Compiling os v0.1.0 (/home/ezra/rCore-Tutorial-Code-2024S/os)
+error: using `fn main` requires the standard library
+  |
+  = help: use `#![no_main]` to bypass the Rust generated entrypoint and declare a platform specific entrypoint yourself, usually with `#[no_mangle]`
+
+error: could not compile `os` (bin "os") due to 1 previous error
+```
+
+- 如编译器所说，我们在 main.rs 中加入 ```#![no_main]``` 即可。
+
+> 至此，我们终于移除了所有标准库依赖。
+
+- 不过直接执行它是行不通的。不要忘记你使用的是 x86_64 的机器。
+- 错误信息如下。
+
+```bash
+$ cargo run
+   Compiling os v0.1.0 (/home/ezra/rCore-Tutorial-Code-2024S/os)
+warning: function `main` is never used
+ --> src/main.rs:4:4
+  |
+4 | fn main() {
+  |    ^^^^
+  |
+  = note: `#[warn(dead_code)]` on by default
+
+warning: `os` (bin "os") generated 1 warning
+    Finished dev [unoptimized + debuginfo] target(s) in 0.27s
+     Running `target/riscv64gc-unknown-none-elf/debug/os`
+target/riscv64gc-unknown-none-elf/debug/os: 1: ELF�@�@8@
+                                                        : not found
+target/riscv64gc-unknown-none-elf/debug/os: 2: Syntax error: "(" unexpected
+```
