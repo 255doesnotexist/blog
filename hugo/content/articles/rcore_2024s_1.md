@@ -255,3 +255,83 @@ target/riscv64gc-unknown-none-elf/debug/os: 1: ELF�@�@8@
                                                         : not found
 target/riscv64gc-unknown-none-elf/debug/os: 2: Syntax error: "(" unexpected
 ```
+
+### 分析被移除标准库的程序
+
+> 我们可以通过一些工具来分析目前的程序：
+
+- file 获取简略的文件类型信息。
+
+```bash
+$ file target/riscv64gc-unknown-none-elf/debug/os
+target/riscv64gc-unknown-none-elf/debug/os: ELF 64-bit LSB executable, UCB RISC-V, RVC, double-float ABI, version 1 (SYSV), statically linked, with debug_info, not stripped
+```
+
+- rust-readbj 读取详细符号信息。
+
+```bash
+$ rust-readobj -h target/riscv64gc-unknown-none-elf/debug/os
+Could not find tool: readobj
+at: /home/ezra/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/llvm-readobj
+Consider `rustup component add llvm-tools-preview
+```
+
+- 哎哟忘记装了，按提示装一下吧。
+
+```bash
+$ rustup component add llvm-tools-preview
+info: downloading component 'llvm-tools'
+info: installing component 'llvm-tools'
+ 29.6 MiB /  29.6 MiB (100 %)  11.3 MiB/s in  2s ETA:  0s
+```
+
+- 装好以后可以读取出以下符号信息。
+
+```bash
+$ rust-readobj -h target/riscv64gc-unknown-none-elf/debug/os
+
+File: target/riscv64gc-unknown-none-elf/debug/os
+Format: elf64-littleriscv
+Arch: riscv64
+AddressSize: 64bit
+LoadName: <Not found>
+ElfHeader {
+  Ident {
+    Magic: (7F 45 4C 46)
+    Class: 64-bit (0x2)
+    DataEncoding: LittleEndian (0x1)
+    FileVersion: 1
+    OS/ABI: SystemV (0x0)
+    ABIVersion: 0
+    Unused: (00 00 00 00 00 00 00)
+  }
+  Type: Executable (0x2)
+  Machine: EM_RISCV (0xF3)
+  Version: 1
+  Entry: 0x0
+  ProgramHeaderOffset: 0x40
+  SectionHeaderOffset: 0x1788
+  Flags [ (0x5)
+    EF_RISCV_FLOAT_ABI_DOUBLE (0x4)
+    EF_RISCV_RVC (0x1)
+  ]
+  HeaderSize: 64
+  ProgramHeaderEntrySize: 56
+  ProgramHeaderCount: 4
+  SectionHeaderEntrySize: 64
+  SectionHeaderCount: 12
+  StringTableSectionIndex: 10
+}
+```
+
+- 反汇编导出汇编程序信息。
+
+```bash
+$ rust-objdump -S target/riscv64gc-unknown-none-elf/debug/os
+
+target/riscv64gc-unknown-none-elf/debug/os:     file format elf64-littleriscv
+```
+
+> 通过 file 工具对二进制程序 os 的分析可以看到，它好像是一个合法的 RV64 执行程序， 但 rust-readobj 工具告诉我们它的入口地址 Entry 是 0。 再通过 rust-objdump 工具把它反汇编，没有生成任何汇编代码。 可见，这个二进制程序虽然合法，但它是一个空程序，原因是缺少了编译器规定的入口函数 _start 。
+
+> 从下一节开始，我们将着手实现本节移除的、由用户态执行环境提供的功能。
