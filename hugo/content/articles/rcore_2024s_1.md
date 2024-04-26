@@ -393,3 +393,62 @@ $ qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os
 ^C (that loop stuck here so send SIGINT to exist)
 $ 
 ```
+
+- 如果注释 _start 中的死循环，再次构建运行。将会触发段错误。这是因为我们还没有一个健全的返回机制。
+
+```bash
+$ cargo build
+   Compiling os v0.1.0 (/home/ezra/rCore-Tutorial-Code-2024S/os)
+warning: function `main` is never used
+  --> src/main.rs:10:4
+   |
+10 | fn main() {
+   |    ^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: `os` (bin "os") generated 1 warning
+    Finished dev [unoptimized + debuginfo] target(s) in 0.14s
+$ qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os
+Segmentation fault
+```
+
+> 目前的执行环境还缺了一个退出机制，我们需要操作系统提供的 exit 系统调用来退出程序。
+
+- 用了很多内联汇编，看文字的意思大概是暂时不需要理解。
+
+```rust
+// os/src/main.rs
+
+const SYSCALL_EXIT: usize = 93;
+
+fn syscall(id: usize, args: [usize; 3]) -> isize {
+    let mut ret;
+    unsafe {
+        core::arch::asm!(
+            "ecall",
+            inlateout("x10") args[0] => ret,
+            in("x11") args[1],
+            in("x12") args[2],
+            in("x17") id,
+        );
+    }
+    ret
+}
+
+pub fn sys_exit(xstate: i32) -> isize {
+    syscall(SYSCALL_EXIT, [xstate as usize, 0, 0])
+}
+
+#[no_mangle]
+extern "C" fn _start() {
+    sys_exit(9);
+}
+```
+
+- 再次构建 os 并执行。这次执行时就没有出现段错误了。
+
+```bash
+$ qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os
+$ 
+```
