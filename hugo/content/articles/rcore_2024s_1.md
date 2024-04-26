@@ -385,3 +385,11 @@ Disassembly of section .text:
    11158: 09 a0         j       0x1115a <_start+0x2>
    1115a: 01 a0         j       0x1115a <_start+0x2>
 ```
+
+> 反汇编出的两条指令就是一个死循环， 这说明编译器生成的已经是一个合理的程序了。 用 qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os 命令可以执行这个程序。
+
+```bash
+$ qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os
+^C (that loop stuck here so send SIGINT to exist)
+$ 
+```
