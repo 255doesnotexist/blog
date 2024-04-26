@@ -354,4 +354,34 @@ extern "C" fn _start() {
 - 和 C、C++ 很像，在程序启动前都存在一个最初的入口点。
 - 通过入口点，我们可以为用户态初始化一些必要的资源。
 
-- 先写到这，形势与政策课 iYanDa 校园网不好，连不上实验实例了。下节课再写。
+~~ 先写到这，形势与政策课 iYanDa 校园网不好，连不上实验实例了。下节课再写。 ~~
+
+- 重新执行 ```cargo build``` 构建 os 程序，程序正常编译，反编译后可以导出两行死循环汇编。正是我们需要的效果 。
+
+```bash
+$ cargo build
+   Compiling os v0.1.0 (/home/ezra/rCore-Tutorial-Code-2024S/os)
+warning: function `main` is never used
+  --> src/main.rs:10:4
+   |
+10 | fn main() {
+   |    ^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: `os` (bin "os") generated 1 warning
+    Finished dev [unoptimized + debuginfo] target(s) in 0.28s
+```
+
+```bash
+$ rust-objdump -S target/riscv64gc-unknown-none-elf/debug/os
+
+target/riscv64gc-unknown-none-elf/debug/os:     file format elf64-littleriscv
+
+Disassembly of section .text:
+
+0000000000011158 <_start>:
+;     loop{};
+   11158: 09 a0         j       0x1115a <_start+0x2>
+   1115a: 01 a0         j       0x1115a <_start+0x2>
+```
