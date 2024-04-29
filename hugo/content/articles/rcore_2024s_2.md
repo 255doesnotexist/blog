@@ -268,3 +268,73 @@ TOML                             1              2              1              9
 SUM:                            19             85             42            586
 -------------------------------------------------------------------------------
 ```
+
+> 用户库看起来很复杂，它预留了直到 ch7 内核才能实现的系统调用接口，console 模块还实现了输出缓存区。它们不是为本章准备的，你只需关注本节提到的部分即可。
+
+## 应用程序设计
+
+- 弱链接实现检测 main。
+ 
+> 我们在 lib.rs 中看到了另一个 main ：
+
+```bash
+#![feature(linkage)]    // 启用弱链接特性
+
+#[linkage = "weak"]
+#[no_mangle]
+fn main() -> i32 {
+    panic!("Cannot find main!");
+}
+```
+
+> 我们使用 Rust 宏将其标志为弱链接。这样在最后链接的时候， 虽然 lib.rs 和 bin 目录下的某个应用程序中都有 main 符号， 但由于 lib.rs 中的 main 符号是弱链接， 链接器会使用 bin 目录下的函数作为 main 。 如果在 bin 目录下找不到任何 main ，那么编译也能通过，但会在运行时报错。
+
+### 内存布局
+
+> 我们使用链接脚本 user/src/linker.ld 规定用户程序的内存布局：
+
+> - 将程序的起始物理地址调整为 0x80400000 ，三个应用程序都会被加载到这个物理地址上运行；
+
+- 实际查看文件时地址是 0x0，其实是因为在文档后期该内容已经被修改了。
+
+> - 将 _start 所在的 .text.entry 放在整个程序的开头 0x80400000； 批处理系统在加载应用后，跳转到 0x80400000，就进入了用户库的 _start 函数；
+
+> - 提供了最终生成可执行文件的 .bss 段的起始和终止地址，方便 clear_bss 函数使用。
+
+> 其余的部分和第一章基本相同。
+
+### 系统调用
+
+- 按照 RISC-V 调用规范实现了 sys_write 和 sys_exit 两个 syscall。
+> 简而言之，这条汇编代码的执行结果是以寄存器 a0~a2 来保存系统调用的参数，以及寄存器 a7 保存 syscall ID， 返回值通过寄存器 a0 传递给局部变量 ret。
+
+- 详情请查阅原版文档。
+
+> 于是 sys_write 和 sys_exit 只需将 syscall 进行包装：
+
+```rust
+// user/src/syscall.rs
+
+const SYSCALL_WRITE: usize = 64;
+const SYSCALL_EXIT: usize = 93;
+
+pub fn sys_write(fd: usize, buffer: &[u8]) -> isize {
+    syscall(SYSCALL_WRITE, [fd, buffer.as_ptr() as usize, buffer.len)])
+}
+
+pub fn sys_exit(xstate: i32) -> isize {
+    syscall(SYSCALL_EXIT, [xstate as usize, 0, 0])
+}
+```
+
+> 我们将上述两个系统调用在用户库 user_lib 中进一步封装，像标准库一样：
+
+```rust
+// user/src/lib.rs
+use syscall::*;
+
+pub fn write(fd: usize, buf: &[u8]) -> isize { sys_write(fd, buf) }
+pub fn exit(exit_code: i32) -> isize { sys_exit(exit_code) }
+```
+
+> 在 console 子模块中，借助 write，我们为应用程序实现了 println! 宏。 传入到 write 的 fd 参数设置为 1，代表标准输出 STDOUT，暂时不用考虑其他的 fd 选取情况。
