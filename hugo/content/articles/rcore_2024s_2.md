@@ -515,12 +515,12 @@ impl TrapContext {
     .section .text
     .globl __alltraps
     .globl __restore
-    .align 2
+    .align 2 # 四字节对齐，RISC-V 特权级规范的要求
 __alltraps:
-    csrrw sp, sscratch, sp
+    csrrw sp, sscratch, sp # csrrw rd, csr, rs 可以将 CSR 当前的值读到通用寄存器 rd 中，然后将通用寄存器的值写入 CSR。因此这里的作用是交换 是scratch 和 sp。相当于把内核栈交换到实际的 sp 栈顶寄存器上，用户栈暂存到待交换位置。
     # now sp->kernel stack, sscratch->user stack
     # allocate a TrapContext on kernel stack
-    addi sp, sp, -34*8
+    addi sp, sp, -34*8 # 预先分配 34*8 字节栈帧。
     # save general-purpose registers
     sd x1, 1*8(sp)
     # skip sp(x2), we will save it later
@@ -569,4 +569,41 @@ __restore:
     # now sp->kernel stack, sscratch->user stack
     csrrw sp, sscratch, sp
     sret
+```
+
+- 作用在注释里讲的很清楚，基本是按一定的逻辑顺序备份上下文，然后调用 trap_handler。等调用结束后再按原样恢复现场。
+
+- CSR 指令是原子的，很神奇吧！
+
+- 然后是 trap_handler。
+
+```rust
+#[no_mangle]
+/// handle an interrupt, exception, or system call from user space
+pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
+    let scause = scause::read(); // get trap cause
+    let stval = stval::read(); // get extra value
+    match scause.cause() { // 根据 scause 寄存器所保存的 Trap 的原因进行分发处理。这里我们无需手动操作这些 CSR ，而是使用 Rust 第三方库 riscv 。
+        Trap::Exception(Exception::UserEnvCall) => { // 系统调用出错，因此尝试让 sepc 在恢复后指向 ecall 指令后的下一条指令
+            cx.sepc += 4; // 4 是 ecall 指令的码长
+            cx.x[10] = syscall(cx.x[17], [cx.x[10], cx.x[11], cx.x[12]]) as usize; // 尝试调用系统调用并返回结果（并不实际处理系统调用，只是根据 syscall ID 分发到具体的处理函数）
+        }
+        Trap::Exception(Exception::StoreFault) | Trap::Exception(Exception::StorePageFault) => {
+            println!("[kernel] PageFault in application, kernel killed it.");
+            run_next_app(); // 页面错误，下一个应用
+        }
+        Trap::Exception(Exception::IllegalInstruction) => {
+            println!("[kernel] IllegalInstruction in application, kernel killed it.");
+            run_next_app(); // 非法访存，下一个应用
+        }
+        _ => {
+            panic!(
+                "Unsupported trap {:?}, stval = {:#x}!",
+                scause.cause(),
+                stval
+            ); // 无法处理的 Trap
+        }
+    }
+    cx
+}
 ```
