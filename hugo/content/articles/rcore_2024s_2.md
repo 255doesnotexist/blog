@@ -411,3 +411,38 @@ struct AppManager {
 
 > 在 Trap 触发的一瞬间， CPU 会切换到 S 特权级并跳转到 stvec 所指示的位置。 但是在正式进入 S 特权级的 Trap 处理之前，我们必须保存原控制流的寄存器状态，这一般通过栈来完成。 但我们需要用专门为操作系统准备的内核栈，而不是应用程序运行时用到的用户栈。
 
+```rust
+const USER_STACK_SIZE: usize = 4096 * 2;
+const KERNEL_STACK_SIZE: usize = 4096 * 2;
+
+#[repr(align(4096))]
+struct KernelStack {
+    data: [u8; KERNEL_STACK_SIZE],
+}
+
+#[repr(align(4096))]
+struct UserStack {
+    data: [u8; USER_STACK_SIZE],
+}
+
+static KERNEL_STACK: KernelStack = KernelStack {
+    data: [0; KERNEL_STACK_SIZE],
+};
+static USER_STACK: UserStack = UserStack {
+    data: [0; USER_STACK_SIZE],
+};
+```
+
+> 两个栈以全局变量的形式实例化在批处理操作系统的 .bss 段中。
+
+> 我们为两个类型实现了 get_sp 方法来获取栈顶地址。由于在 RISC-V 中栈是向下增长的， 我们只需返回包裹的数组的结尾地址，以用户栈类型 UserStack 为例：
+
+```rust
+impl UserStack {
+    fn get_sp(&self) -> usize {
+        self.data.as_ptr() as usize + USER_STACK_SIZE
+    }
+}
+```
+
+- 其实就是取指针 + 栈顶偏置直接返回。哎呀这样居然是 safe 的真是太神奇了。
