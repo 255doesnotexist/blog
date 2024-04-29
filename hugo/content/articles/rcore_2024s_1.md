@@ -452,3 +452,89 @@ extern "C" fn _start() {
 $ qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os
 $ 
 ```
+
+#### 有显示支持的用户态执行环境
+
+> 没有 println 输出信息，终究觉得缺了点啥。
+
+> Rust 的 core 库内建了以一系列帮助实现显示字符的基本 Trait 和数据结构，函数等，我们可以对其中的关键部分进行扩展，就可以实现定制的 println! 功能。
+实现输出字符串的相关函数
+
+> 首先封装一下对 SYSCALL_WRITE 系统调用。
+
+```rust
+const SYSCALL_WRITE: usize = 64;
+
+pub fn sys_write(fd: usize, buffer: &[u8]) -> isize {
+  syscall(SYSCALL_WRITE, [fd, buffer.as_ptr() as usize, buffer.len()])
+}
+```
+
+> 然后实现基于 Write Trait 的数据结构，并完成 Write Trait 所需要的 write_str 函数，并用 print 函数进行包装。
+
+```rust
+struct Stdout;
+
+impl Write for Stdout {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        sys_write(1, s.as_bytes());
+        Ok(())
+    }
+}
+
+pub fn print(args: fmt::Arguments) {
+    Stdout.write_fmt(args).unwrap();
+}
+```
+
+> 最后，基于 print 函数，实现 Rust 语言格式化宏 ( formatting macros )。
+
+```rust
+#[macro_export]
+macro_rules! print {
+    ($fmt: literal $(, $($arg: tt)+)?) => {
+        $crate::console::print(format_args!($fmt $(, $($arg)+)?));
+    }
+}
+
+#[macro_export]
+macro_rules! println {
+    ($fmt: literal $(, $($arg: tt)+)?) => {
+        print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?));
+    }
+}
+```
+
+> 接下来，我们调整一下应用程序，让它发出显示字符串和退出的请求：
+
+```rust
+#[no_mangle]
+extern "C" fn _start() {
+    println!("Hello, world!");
+    sys_exit(9);
+}
+```
+
+> 现在，我们编译并执行一下，可以看到正确的字符串输出，且程序也能正确退出！
+
+```bash
+$ cargo build --target riscv64gc-unknown-none-elf
+   Compiling os v0.1.0 (/home/ezra/rCore-Tutorial-Code-2024S/os)
+warning: function `main` is never used
+  --> src/main.rs:65:4
+   |
+65 | fn main() {
+   |    ^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: `os` (bin "os") generated 1 warning
+    Finished dev [unoptimized + debuginfo] target(s) in 0.13s
+$ qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os; echo $?
+Hello, world!
+9
+```
+
+- 注意到由于我们的 main 函数功能已经被 _start 函数替代，因此提示它是 dead code 是正常的。
+
+- 由于二阶段训练营已经开启，本博文进行实验的仓库将从 [255doesnotexist/rCore-Tutorial-Code-2024S](https://github.com/255doesnotexist/rCore-Tutorial-Code-2024S) 切换到 [LearningOS/2024s-rcore-255doesnotexist](https://github.com/LearningOS/2024s-rcore-255doesnotexist) which is 计入成绩和排行榜。

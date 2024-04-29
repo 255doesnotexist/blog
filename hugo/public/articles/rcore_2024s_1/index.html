@@ -34,13 +34,13 @@
   <meta itemprop="name" content="第一章：应用程序与基本执行环境 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 一"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="877"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="1301"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 
   <meta itemprop="name" content="第一章：应用程序与基本执行环境 · rCore 2024S 随记">
 <meta itemprop="description" content="OSComp 2024 随记 · 一"><meta itemprop="datePublished" content="2024-04-19T00:00:00+00:00" />
 <meta itemprop="dateModified" content="2024-04-19T00:00:00+00:00" />
-<meta itemprop="wordCount" content="877"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
+<meta itemprop="wordCount" content="1301"><meta itemprop="image" content="//localhost:1313/digital-garden-logo.png" />
 <meta itemprop="keywords" content="" />
 </head><body class="flex relative h-full min-h-screen"><aside
   class="will-change-transform transform transition-transform -translate-x-full absolute top-0 left-0 md:relative md:translate-x-0 w-3/4 md:basis-60 h-full min-h-screen p-3 bg-slate-50 dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col gap-2.5 z-20 sidebar flex-shrink-0">
@@ -691,14 +691,174 @@ target = &#34;riscv64gc-unknown-none-elf&#34;
 </span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">loop</span>{};
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><ul>
+<li>和 C、C++ 很像，在程序启动前都存在一个最初的入口点。</li>
+<li>通过入口点，我们可以为用户态初始化一些必要的资源。</li>
+</ul>
+<p>~~ 先写到这，形势与政策课 iYanDa 校园网不好，连不上实验实例了。下节课再写。 ~~</p>
+<ul>
+<li>重新执行 <code>cargo build</code> 构建 os 程序，程序正常编译，反编译后可以导出两行死循环汇编。正是我们需要的效果 。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ cargo build
+</span></span><span style="display:flex;"><span>   Compiling os v0.1.0 <span style="color:#ff79c6">(</span>/home/ezra/rCore-Tutorial-Code-2024S/os<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>warning: <span style="color:#ff79c6">function</span> <span style="color:#f1fa8c">`</span>main<span style="color:#f1fa8c">`</span> is never used
+</span></span><span style="display:flex;"><span>  --&gt; src/main.rs:10:4
+</span></span><span style="display:flex;"><span>   |
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">10</span> | fn main<span style="color:#ff79c6">()</span> <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>   |    ^^^^
+</span></span><span style="display:flex;"><span>   |
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">=</span> note: <span style="color:#f1fa8c">`</span><span style="color:#6272a4">#[warn(dead_code)]` on by default</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>warning: <span style="color:#f1fa8c">`</span>os<span style="color:#f1fa8c">`</span> <span style="color:#ff79c6">(</span>bin <span style="color:#f1fa8c">&#34;os&#34;</span><span style="color:#ff79c6">)</span> generated <span style="color:#bd93f9">1</span> warning
+</span></span><span style="display:flex;"><span>    Finished dev <span style="color:#ff79c6">[</span>unoptimized + debuginfo<span style="color:#ff79c6">]</span> target<span style="color:#ff79c6">(</span>s<span style="color:#ff79c6">)</span> in 0.28s
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ rust-objdump -S target/riscv64gc-unknown-none-elf/debug/os
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>target/riscv64gc-unknown-none-elf/debug/os:     file format elf64-littleriscv
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Disassembly of section .text:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">0000000000011158</span> &lt;_start&gt;:
+</span></span><span style="display:flex;"><span>;     loop<span style="color:#ff79c6">{}</span>;
+</span></span><span style="display:flex;"><span>   11158: <span style="color:#bd93f9">09</span> a0         j       0x1115a &lt;_start+0x2&gt;
+</span></span><span style="display:flex;"><span>   1115a: <span style="color:#bd93f9">01</span> a0         j       0x1115a &lt;_start+0x2&gt;
+</span></span></code></pre></div><blockquote>
+<p>反汇编出的两条指令就是一个死循环， 这说明编译器生成的已经是一个合理的程序了。 用 qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os 命令可以执行这个程序。</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os
+</span></span><span style="display:flex;"><span>^C <span style="color:#ff79c6">(</span>that loop stuck here so send SIGINT to exist<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>$ 
+</span></span></code></pre></div><ul>
+<li>如果注释 _start 中的死循环，再次构建运行。将会触发段错误。这是因为我们还没有一个健全的返回机制。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ cargo build
+</span></span><span style="display:flex;"><span>   Compiling os v0.1.0 <span style="color:#ff79c6">(</span>/home/ezra/rCore-Tutorial-Code-2024S/os<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>warning: <span style="color:#ff79c6">function</span> <span style="color:#f1fa8c">`</span>main<span style="color:#f1fa8c">`</span> is never used
+</span></span><span style="display:flex;"><span>  --&gt; src/main.rs:10:4
+</span></span><span style="display:flex;"><span>   |
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">10</span> | fn main<span style="color:#ff79c6">()</span> <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>   |    ^^^^
+</span></span><span style="display:flex;"><span>   |
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">=</span> note: <span style="color:#f1fa8c">`</span><span style="color:#6272a4">#[warn(dead_code)]` on by default</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>warning: <span style="color:#f1fa8c">`</span>os<span style="color:#f1fa8c">`</span> <span style="color:#ff79c6">(</span>bin <span style="color:#f1fa8c">&#34;os&#34;</span><span style="color:#ff79c6">)</span> generated <span style="color:#bd93f9">1</span> warning
+</span></span><span style="display:flex;"><span>    Finished dev <span style="color:#ff79c6">[</span>unoptimized + debuginfo<span style="color:#ff79c6">]</span> target<span style="color:#ff79c6">(</span>s<span style="color:#ff79c6">)</span> in 0.14s
+</span></span><span style="display:flex;"><span>$ qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os
+</span></span><span style="display:flex;"><span>Segmentation fault
+</span></span></code></pre></div><blockquote>
+<p>目前的执行环境还缺了一个退出机制，我们需要操作系统提供的 exit 系统调用来退出程序。</p>
+</blockquote>
+<ul>
+<li>用了很多内联汇编，看文字的意思大概是暂时不需要理解。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#6272a4">// os/src/main.rs
+</span></span></span><span style="display:flex;"><span><span style="color:#6272a4"></span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">const</span> SYSCALL_EXIT: <span style="color:#8be9fd">usize</span> <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">93</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">syscall</span>(id: <span style="color:#8be9fd">usize</span>, args: [<span style="color:#8be9fd">usize</span>; <span style="color:#bd93f9">3</span>]) -&gt; <span style="color:#8be9fd">isize</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#8be9fd;font-style:italic">let</span> <span style="color:#ff79c6">mut</span> ret;
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">unsafe</span> {
+</span></span><span style="display:flex;"><span>        core::arch::asm!(
+</span></span><span style="display:flex;"><span>            <span style="color:#f1fa8c">&#34;ecall&#34;</span>,
+</span></span><span style="display:flex;"><span>            inlateout(<span style="color:#f1fa8c">&#34;x10&#34;</span>) args[<span style="color:#bd93f9">0</span>] <span style="color:#ff79c6">=&gt;</span> ret,
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">in</span>(<span style="color:#f1fa8c">&#34;x11&#34;</span>) args[<span style="color:#bd93f9">1</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">in</span>(<span style="color:#f1fa8c">&#34;x12&#34;</span>) args[<span style="color:#bd93f9">2</span>],
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">in</span>(<span style="color:#f1fa8c">&#34;x17&#34;</span>) id,
+</span></span><span style="display:flex;"><span>        );
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    ret
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">pub</span> <span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">sys_exit</span>(xstate: <span style="color:#8be9fd">i32</span>) -&gt; <span style="color:#8be9fd">isize</span> {
+</span></span><span style="display:flex;"><span>    syscall(SYSCALL_EXIT, [xstate <span style="color:#ff79c6">as</span> <span style="color:#8be9fd">usize</span>, <span style="color:#bd93f9">0</span>, <span style="color:#bd93f9">0</span>])
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">#[no_mangle]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">extern</span> <span style="color:#f1fa8c">&#34;C&#34;</span> <span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">_start</span>() {
+</span></span><span style="display:flex;"><span>    sys_exit(<span style="color:#bd93f9">9</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><ul>
+<li>再次构建 os 并执行。这次执行时就没有出现段错误了。</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os
+</span></span><span style="display:flex;"><span>$ 
+</span></span></code></pre></div><h4 id="有显示支持的用户态执行环境">有显示支持的用户态执行环境</h4>
+<blockquote>
+<p>没有 println 输出信息，终究觉得缺了点啥。</p>
+</blockquote>
+<blockquote>
+<p>Rust 的 core 库内建了以一系列帮助实现显示字符的基本 Trait 和数据结构，函数等，我们可以对其中的关键部分进行扩展，就可以实现定制的 println! 功能。
+实现输出字符串的相关函数</p>
+</blockquote>
+<blockquote>
+<p>首先封装一下对 SYSCALL_WRITE 系统调用。</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#ff79c6">const</span> SYSCALL_WRITE: <span style="color:#8be9fd">usize</span> <span style="color:#ff79c6">=</span> <span style="color:#bd93f9">64</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">pub</span> <span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">sys_write</span>(fd: <span style="color:#8be9fd">usize</span>, buffer: <span style="color:#ff79c6">&amp;</span>[<span style="color:#8be9fd">u8</span>]) -&gt; <span style="color:#8be9fd">isize</span> {
+</span></span><span style="display:flex;"><span>  syscall(SYSCALL_WRITE, [fd, buffer.as_ptr() <span style="color:#ff79c6">as</span> <span style="color:#8be9fd">usize</span>, buffer.len()])
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><blockquote>
+<p>然后实现基于 Write Trait 的数据结构，并完成 Write Trait 所需要的 write_str 函数，并用 print 函数进行包装。</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#ff79c6">struct</span> <span style="color:#50fa7b">Stdout</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">impl</span> Write <span style="color:#ff79c6">for</span> Stdout {
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">write_str</span>(<span style="color:#ff79c6">&amp;</span><span style="color:#ff79c6">mut</span> self, s: <span style="color:#ff79c6">&amp;</span><span style="color:#8be9fd">str</span>) -&gt; <span style="color:#50fa7b">fmt</span>::<span style="color:#8be9fd;font-style:italic">Result</span> {
+</span></span><span style="display:flex;"><span>        sys_write(<span style="color:#bd93f9">1</span>, s.as_bytes());
+</span></span><span style="display:flex;"><span>        <span style="color:#8be9fd;font-style:italic">Ok</span>(())
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">pub</span> <span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">print</span>(args: <span style="color:#50fa7b">fmt</span>::Arguments) {
+</span></span><span style="display:flex;"><span>    Stdout.write_fmt(args).unwrap();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><blockquote>
+<p>最后，基于 print 函数，实现 Rust 语言格式化宏 ( formatting macros )。</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#ff79c6">#[macro_export]</span>
+</span></span><span style="display:flex;"><span>macro_rules<span style="color:#ff79c6">!</span> print {
+</span></span><span style="display:flex;"><span>    (<span style="color:#ff79c6">$fmt</span>: <span style="color:#50fa7b">literal</span> <span style="color:#ff79c6">$(,</span> <span style="color:#ff79c6">$($arg</span>: <span style="color:#50fa7b">tt</span>)<span style="color:#ff79c6">+</span>)<span style="color:#ff79c6">?</span>) <span style="color:#ff79c6">=&gt;</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">$crate</span>::console::print(format_args!(<span style="color:#ff79c6">$fmt</span> <span style="color:#ff79c6">$(,</span> <span style="color:#ff79c6">$($arg</span>)<span style="color:#ff79c6">+</span>)<span style="color:#ff79c6">?</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">#[macro_export]</span>
+</span></span><span style="display:flex;"><span>macro_rules<span style="color:#ff79c6">!</span> println {
+</span></span><span style="display:flex;"><span>    (<span style="color:#ff79c6">$fmt</span>: <span style="color:#50fa7b">literal</span> <span style="color:#ff79c6">$(,</span> <span style="color:#ff79c6">$($arg</span>: <span style="color:#50fa7b">tt</span>)<span style="color:#ff79c6">+</span>)<span style="color:#ff79c6">?</span>) <span style="color:#ff79c6">=&gt;</span> {
+</span></span><span style="display:flex;"><span>        print(format_args!(concat!(<span style="color:#ff79c6">$fmt</span>, <span style="color:#f1fa8c">&#34;</span><span style="color:#f1fa8c">\n</span><span style="color:#f1fa8c">&#34;</span>) <span style="color:#ff79c6">$(,</span> <span style="color:#ff79c6">$($arg</span>)<span style="color:#ff79c6">+</span>)<span style="color:#ff79c6">?</span>));
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><blockquote>
+<p>接下来，我们调整一下应用程序，让它发出显示字符串和退出的请求：</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#ff79c6">#[no_mangle]</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">extern</span> <span style="color:#f1fa8c">&#34;C&#34;</span> <span style="color:#ff79c6">fn</span> <span style="color:#50fa7b">_start</span>() {
+</span></span><span style="display:flex;"><span>    println!(<span style="color:#f1fa8c">&#34;Hello, world!&#34;</span>);
+</span></span><span style="display:flex;"><span>    sys_exit(<span style="color:#bd93f9">9</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><blockquote>
+<p>现在，我们编译并执行一下，可以看到正确的字符串输出，且程序也能正确退出！</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ cargo build --target riscv64gc-unknown-none-elf
+</span></span><span style="display:flex;"><span>   Compiling os v0.1.0 <span style="color:#ff79c6">(</span>/home/ezra/rCore-Tutorial-Code-2024S/os<span style="color:#ff79c6">)</span>
+</span></span><span style="display:flex;"><span>warning: <span style="color:#ff79c6">function</span> <span style="color:#f1fa8c">`</span>main<span style="color:#f1fa8c">`</span> is never used
+</span></span><span style="display:flex;"><span>  --&gt; src/main.rs:65:4
+</span></span><span style="display:flex;"><span>   |
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">65</span> | fn main<span style="color:#ff79c6">()</span> <span style="color:#ff79c6">{</span>
+</span></span><span style="display:flex;"><span>   |    ^^^^
+</span></span><span style="display:flex;"><span>   |
+</span></span><span style="display:flex;"><span>   <span style="color:#ff79c6">=</span> note: <span style="color:#f1fa8c">`</span><span style="color:#6272a4">#[warn(dead_code)]` on by default</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>warning: <span style="color:#f1fa8c">`</span>os<span style="color:#f1fa8c">`</span> <span style="color:#ff79c6">(</span>bin <span style="color:#f1fa8c">&#34;os&#34;</span><span style="color:#ff79c6">)</span> generated <span style="color:#bd93f9">1</span> warning
+</span></span><span style="display:flex;"><span>    Finished dev <span style="color:#ff79c6">[</span>unoptimized + debuginfo<span style="color:#ff79c6">]</span> target<span style="color:#ff79c6">(</span>s<span style="color:#ff79c6">)</span> in 0.13s
+</span></span><span style="display:flex;"><span>$ qemu-riscv64 target/riscv64gc-unknown-none-elf/debug/os; <span style="color:#8be9fd;font-style:italic">echo</span> <span style="color:#8be9fd;font-style:italic">$?</span>
+</span></span><span style="display:flex;"><span>Hello, world!
+</span></span><span style="display:flex;"><span><span style="color:#bd93f9">9</span>
+</span></span></code></pre></div><ul>
 <li>
-<p>和 C、C++ 很像，在程序启动前都存在一个最初的入口点。</p>
+<p>注意到由于我们的 main 函数功能已经被 _start 函数替代，因此提示它是 dead code 是正常的。</p>
 </li>
 <li>
-<p>通过入口点，我们可以为用户态初始化一些必要的资源。</p>
-</li>
-<li>
-<p>先写到这，形势与政策课 iYanDa 校园网不好，连不上实验实例了。下节课再写。</p>
+<p>由于二阶段训练营已经开启，本博文进行实验的仓库将从 <a href="https://github.com/255doesnotexist/rCore-Tutorial-Code-2024S"  target="_blank" rel="noopener" >255doesnotexist/rCore-Tutorial-Code-2024S</a> 切换到 <a href="https://github.com/LearningOS/2024s-rcore-255doesnotexist"  target="_blank" rel="noopener" >LearningOS/2024s-rcore-255doesnotexist</a> which is 计入成绩和排行榜。</p>
 </li>
 </ul>
 
