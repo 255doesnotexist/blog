@@ -538,3 +538,36 @@ Hello, world!
 - 注意到由于我们的 main 函数功能已经被 _start 函数替代，因此提示它是 dead code 是正常的。
 
 - 由于二阶段训练营已经开启，本博文进行实验的仓库将从 [255doesnotexist/rCore-Tutorial-Code-2024S](https://github.com/255doesnotexist/rCore-Tutorial-Code-2024S) 切换到 [LearningOS/2024s-rcore-255doesnotexist](https://github.com/LearningOS/2024s-rcore-255doesnotexist) which is 计入成绩和排行榜。
+
+## 构建裸机执行环境
+
+### 裸机启动过程
+
+> 用 QEMU 软件 qemu-system-riscv64 来模拟 RISC-V 64 计算机。加载内核程序的命令如下：
+
+```bash
+qemu-system-riscv64 \
+            -machine virt \
+            -nographic \
+            -bios $(BOOTLOADER) \
+            -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA)
+```
+
+> -bios $(BOOTLOADER) 意味着硬件加载了一个 BootLoader 程序，即 RustSBI
+
+> -device loader,file=$(KERNEL_BIN),addr=$(KERNEL_ENTRY_PA) 表示硬件内存中的特定位置 $(KERNEL_ENTRY_PA) 放置了操作系统的二进制代码 $(KERNEL_BIN) 。 $(KERNEL_ENTRY_PA) 的值是 0x80200000 。
+
+> 当我们执行包含上述启动参数的 qemu-system-riscv64 软件，就意味给这台虚拟的 RISC-V64 计算机加电了。 此时，CPU 的其它通用寄存器清零，而 PC 会指向 0x1000 的位置，这里有固化在硬件中的一小段引导代码， 它会很快跳转到 0x80000000 的 RustSBI 处。 RustSBI完成硬件初始化后，会跳转到 $(KERNEL_BIN) 所在内存位置 0x80200000 处， 执行操作系统的第一条指令。
+>
+
+- 接下来用内置汇编实现 sbi_call，类似 syscall。
+
+> 应用程序访问操作系统提供的系统调用的指令是 ecall ，操作系统访问 RustSBI提供的SBI调用的指令也是 ecall ， 虽然指令一样，但它们所在的特权级是不一样的。 简单地说，应用程序位于最弱的用户特权级（User Mode）， 操作系统位于内核特权级（Supervisor Mode）， RustSBI位于机器特权级（Machine Mode）。 下一章会进一步阐释具体细节。
+
+- 然后设置链接脚本 os/src/linker.ld，标记入口点为 _start、基地址为 0x80200000。需要可以直接看 ch1 的相关文件。
+- 然后写 entry.asm 用于声明 64KiB 的 boot 栈空间。栈顶地址标记为 boot_stack_top，栈底则是 boot_stack。
+- la sp, boot_stack_top 把栈顶地址赋给经典的 sp 寄存器。
+- 在 main.rs 中用全局内联汇编嵌入 entry.asm。
+- 利用 #[no_mangle] 声明不被混淆的 rust_main 导出函数。
+- 在 rust_main 中调用 sbi_call 中的 SHUTDOWN。
+- 可见 qemu 被合理关闭了。
