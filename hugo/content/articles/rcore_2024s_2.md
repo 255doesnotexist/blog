@@ -502,7 +502,7 @@ impl TrapContext {
 - 利用 extern "C" 引入外部符号 __alltraps、__restore，将 stvec.write 以 Direct 模式指向它的地址。标记为函数。通过 global_asm! 宏将 trap.S 这段汇编代码插入进来。
 - 其中上下文的保存与恢复使用外部汇编代码 __alltraps、__restore，而具体处理部分使用 Rust 编写的函数 trap_handler完成。
 
-- 以下是两个外部汇编函数
+- 以下是两个外部汇编函数（记得修改 stvec，使其指向正确的 __alltraps 入口点）
 
 ```asm
 .altmacro
@@ -541,7 +541,7 @@ __alltraps:
     csrr t2, sscratch
     sd t2, 2*8(sp)
     # set input argument of trap_handler(cx: &mut TrapContext)
-    mv a0, sp
+    mv a0, sp # 保存内核栈位置到 a0 寄存器，对于 __restore 来说很重要哦
     call trap_handler
 
 __restore:
@@ -606,4 +606,79 @@ pub fn trap_handler(cx: &mut TrapContext) -> &mut TrapContext {
     }
     cx
 }
+```
+
+- 对于 syscall 的处理，其实是按照 syscall_id 用 match 分发给具体的实现函数。
+- 顺便，你得把 args 转化成那个函数能接受的形式哦。
+
+### 执行应用程序
+
+> 当批处理操作系统初始化完成，或者是某个应用程序运行结束或出错的时候，我们要调用 run_next_app 函数切换到下一个应用程序。此时 CPU 运行在 S 特权级，而它希望能够切换到 U 特权级。在 RISC-V 架构中，唯一一种能够使得 CPU 特权级下降的方法就是通过 Trap 返回系列指令，比如 sret 。事实上，在运行应用程序之前要完成如下这些工作：
+
+> - 跳转到应用程序入口点 0x80400000；
+
+> - 将使用的栈切换到用户栈；
+
+> - 在 __alltraps 时我们要求 sscratch 指向内核栈，这个也需要在此时完成；
+
+> - 从 S 特权级切换到 U 特权级。
+
+> 它们可以通过复用 __restore 的代码来更容易的实现上述工作。我们只需要在内核栈上压入一个为启动应用程序而特殊构造的 Trap 上下文，再通过 __restore 函数，就能 让这些寄存器到达启动应用程序所需要的上下文状态。
+
+```rust
+/// Trap Context
+#[repr(C)]
+pub struct TrapContext {
+    /// general regs[0..31]
+    pub x: [usize; 32],
+    /// CSR sstatus      
+    pub sstatus: Sstatus,
+    /// CSR sepc
+    pub sepc: usize,
+}
+
+impl TrapContext {
+    /// set stack pointer to x_2 reg (sp)
+    pub fn set_sp(&mut self, sp: usize) {
+        self.x[2] = sp;
+    }
+    /// init app context
+    pub fn app_init_context(entry: usize, sp: usize) -> Self {
+        let mut sstatus = sstatus::read(); // CSR sstatus
+        sstatus.set_spp(SPP::User); //previous privilege mode: user mode // 前一个特权模式设置
+        let mut cx = Self {
+            x: [0; 32],
+            sstatus,
+            sepc: entry, // entry point of app // 修改入口点为该应用程序的入口点
+        };
+        cx.set_sp(sp); // app's user stack pointer
+        cx // return initial Trap Context of app // 返回初始化好的 cx
+    }
+}
+```
+
+```rust
+/// run next app
+pub fn run_next_app() -> ! {
+    let mut app_manager = APP_MANAGER.exclusive_access();
+    let current_app = app_manager.get_current_app();
+    unsafe {
+        app_manager.load_app(current_app);
+    }
+    app_manager.move_to_next_app();
+    drop(app_manager);
+    // before this we have to drop local variables related to resources manually
+    // and release the resources
+    extern "C" {
+        fn __restore(cx_addr: usize);
+    }
+    unsafe { // 在内核栈上压入一个 Trap 上下文， sepc 是应用程序入口地址 0x80400000，sp 寄存器指向用户栈
+        __restore(KERNEL_STACK.push_context(TrapContext::app_init_context( // push_context 返回值是压入 TrapContext 后的内核栈顶
+            APP_BASE_ADDRESS,
+            USER_STACK.get_sp(),
+        )) as *const _ as usize); // 这样等 push 完返回后，__restore 里的 sp 寄存器依然是内核栈栈顶。（想想在 __restore 在 sp 是用户栈时会发生多么可怕的瞎恢复！） 所以 ___restore 第一条指令就是从参数中取出正确的内核栈栈顶：sp <- a0。
+    }
+    panic!("Unreachable in batch::run_current_app!");
+}
+
 ```
