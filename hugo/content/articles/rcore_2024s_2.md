@@ -4,6 +4,8 @@ date: 2024-04-29
 description: OSComp 2024 随记 · 二
 ---
 
+- 由于 ch2 已经被实现好了，本部分基本为摘抄。
+
 # 前言
 
 实际实践参考的文档：[rCore Tutorial Guide 2024S](https://learningos.cn/rCore-Tutorial-Guide-2024S/)。
@@ -446,3 +448,125 @@ impl UserStack {
 ```
 
 - 其实就是取指针 + 栈顶偏置直接返回。哎呀这样居然是 safe 的真是太神奇了。
+换栈是非常简单的，只需将 sp 寄存器的值修改为 get_sp 的返回值即可。
+
+> 接下来是 Trap 上下文，即在 Trap 发生时需要保存的物理资源内容，定义如下：
+
+```rust
+use riscv::register::sstatus::{self, Sstatus, SPP};
+/// Trap Context
+#[repr(C)]
+pub struct TrapContext {
+    /// general regs[0..31]
+    pub x: [usize; 32],
+    /// CSR sstatus      
+    pub sstatus: Sstatus,
+    /// CSR sepc
+    pub sepc: usize,
+}
+
+impl TrapContext {
+    /// set stack pointer to x_2 reg (sp)
+    pub fn set_sp(&mut self, sp: usize) {
+        self.x[2] = sp;
+    }
+    /// init app context
+    pub fn app_init_context(entry: usize, sp: usize) -> Self {
+        let mut sstatus = sstatus::read(); // CSR sstatus
+        sstatus.set_spp(SPP::User); //previous privilege mode: user mode
+        let mut cx = Self {
+            x: [0; 32],
+            sstatus,
+            sepc: entry, // entry point of app
+        };
+        cx.set_sp(sp); // app's user stack pointer
+        cx // return initial Trap Context of app
+    }
+}
+```
+
+> 可以看到里面包含所有的通用寄存器 x0~x31 ，还有 sstatus 和 sepc 。
+
+> 对于通用寄存器而言，两条控制流（应用程序控制流和内核控制流）运行在不同的特权级，所属的软件也可能由不同的编程语言编写，虽然在 Trap 控制流中只是会执行 Trap 处理 相关的代码，但依然可能直接或间接调用很多模块，因此很难甚至不可能找出哪些寄存器无需保存。既然如此我们就只能全部保存了。但这里也有一些例外， 如 x0 被硬编码为 0 ，它自然不会有变化；还有 tp(x4) 寄存器，除非我们手动出于一些特殊用途使用它，否则一般也不会被用到。虽然它们无需保存， 但我们仍然在 TrapContext 中为它们预留空间，主要是为了后续的实现方便。
+
+> 对于 CSR 而言，我们知道进入 Trap 的时候，硬件会立即覆盖掉 scause/stval/sstatus/sepc 的全部或是其中一部分。scause/stval 的情况是：它总是在 Trap 处理的第一时间就被使用或者是在其他地方保存下来了，因此它没有被修改并造成不良影响的风险。 而对于 sstatus/sepc 而言，它们会在 Trap 处理的全程有意义（在 Trap 控制流最后 sret 的时候还用到了它们），而且确实会出现 Trap 嵌套的情况使得它们的值被覆盖掉。所以我们需要将它们也一起保存下来，并在 sret 之前恢复原样。
+
+### Trap 管理
+
+#### Trap 上下文的保存与恢复
+
+- 细节请阅读原文档。
+
+- 首先修改 stvec 寄存器指向正确的 Trap 处理入口点。
+
+- 利用 extern "C" 引入外部符号 __alltraps、__restore，将 stvec.write 以 Direct 模式指向它的地址。标记为函数。通过 global_asm! 宏将 trap.S 这段汇编代码插入进来。
+- 其中上下文的保存与恢复使用外部汇编代码 __alltraps、__restore，而具体处理部分使用 Rust 编写的函数 trap_handler完成。
+
+- 以下是两个外部汇编函数
+
+```asm
+.altmacro
+.macro SAVE_GP n
+    sd x\n, \n*8(sp)
+.endm
+.macro LOAD_GP n
+    ld x\n, \n*8(sp)
+.endm
+    .section .text
+    .globl __alltraps
+    .globl __restore
+    .align 2
+__alltraps:
+    csrrw sp, sscratch, sp
+    # now sp->kernel stack, sscratch->user stack
+    # allocate a TrapContext on kernel stack
+    addi sp, sp, -34*8
+    # save general-purpose registers
+    sd x1, 1*8(sp)
+    # skip sp(x2), we will save it later
+    sd x3, 3*8(sp)
+    # skip tp(x4), application does not use it
+    # save x5~x31
+    .set n, 5
+    .rept 27
+        SAVE_GP %n
+        .set n, n+1
+    .endr
+    # we can use t0/t1/t2 freely, because they were saved on kernel stack
+    csrr t0, sstatus
+    csrr t1, sepc
+    sd t0, 32*8(sp)
+    sd t1, 33*8(sp)
+    # read user stack from sscratch and save it on the kernel stack
+    csrr t2, sscratch
+    sd t2, 2*8(sp)
+    # set input argument of trap_handler(cx: &mut TrapContext)
+    mv a0, sp
+    call trap_handler
+
+__restore:
+    # case1: start running app by __restore
+    # case2: back to U after handling trap
+    mv sp, a0
+    # now sp->kernel stack(after allocated), sscratch->user stack
+    # restore sstatus/sepc
+    ld t0, 32*8(sp)
+    ld t1, 33*8(sp)
+    ld t2, 2*8(sp)
+    csrw sstatus, t0
+    csrw sepc, t1
+    csrw sscratch, t2
+    # restore general-purpuse registers except sp/tp
+    ld x1, 1*8(sp)
+    ld x3, 3*8(sp)
+    .set n, 5
+    .rept 27
+        LOAD_GP %n
+        .set n, n+1
+    .endr
+    # release TrapContext on kernel stack
+    addi sp, sp, 34*8
+    # now sp->kernel stack, sscratch->user stack
+    csrrw sp, sscratch, sp
+    sret
+```
