@@ -571,3 +571,66 @@ qemu-system-riscv64 \
 - 利用 #[no_mangle] 声明不被混淆的 rust_main 导出函数。
 - 在 rust_main 中调用 sbi_call 中的 SHUTDOWN。
 - 可见 qemu 被合理关闭了。
+
+- 然而并没有清空内存 .bss 段。
+
+```rust
+fn clear_bss() {
+    extern "C" {
+        fn sbss();
+        fn ebss();
+    }
+    (sbss as usize..ebss as usize).for_each(|a| {
+        unsafe { (a as *mut u8).write_volatile(0) }
+    });
+}
+
+pub fn rust_main() -> ! {
+    clear_bss();
+    shutdown();
+}
+```
+
+- 利用链接脚本中 sbss 和 ebss 给出的位置即可完成清空工作。
+
+- 略作修改用户态程序，执行 ```make run LOG=TRACE```。
+
+```bash
+$ make run LOG=TRACE
+(rustup target list | grep "riscv64gc-unknown-none-elf (installed)") || rustup target add riscv64gc-unknown-none-elf
+riscv64gc-unknown-none-elf (installed)
+cargo install cargo-binutils
+    Updating crates.io index
+     Ignored package `cargo-binutils v0.3.6` is already installed, use --force to override
+rustup component add rust-src
+info: component 'rust-src' is up to date
+rustup component add llvm-tools-preview
+info: component 'llvm-tools' for target 'x86_64-unknown-linux-gnu' is up to date
+Platform: qemu
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.01s
+[rustsbi] RustSBI version 0.3.0-alpha.4, adapting to RISC-V SBI v1.0.0
+.______       __    __      _______.___________.  _______..______   __
+|   _  \     |  |  |  |    /       |           | /       ||   _  \ |  |
+|  |_)  |    |  |  |  |   |   (----`---|  |----`|   (----`|  |_)  ||  |
+|      /     |  |  |  |    \   \       |  |      \   \    |   _  < |  |
+|  |\  \----.|  `--'  |.----)   |      |  |  .----)   |   |  |_)  ||  |
+| _| `._____| \______/ |_______/       |__|  |_______/    |______/ |__|
+[rustsbi] Implementation     : RustSBI-QEMU Version 0.2.0-alpha.2
+[rustsbi] Platform Name      : riscv-virtio,qemu
+[rustsbi] Platform SMP       : 1
+[rustsbi] Platform Memory    : 0x80000000..0x88000000
+[rustsbi] Boot HART          : 0
+[rustsbi] Device Tree Region : 0x87000000..0x87000ef2
+[rustsbi] Firmware Address   : 0x80000000
+[rustsbi] Supervisor Address : 0x80200000
+[rustsbi] pmp01: 0x00000000..0x80000000 (-wr)
+[rustsbi] pmp02: 0x80000000..0x80200000 (---)
+[rustsbi] pmp03: 0x80200000..0x88000000 (xwr)
+[rustsbi] pmp04: 0x88000000..0x00000000 (-wr)
+[kernel] Hello, world!
+[TRACE] [kernel] .text [0x80200000, 0x80202000)
+[DEBUG] [kernel] .rodata [0x80202000, 0x80203000)
+[ INFO] [kernel] .data [0x80203000, 0x80204000)
+[ WARN] [kernel] boot_stack top=bottom=0x80214000, lower_bound=0x80204000
+[ERROR] [kernel] .bss [0x80214000, 0x80215000)
+```
