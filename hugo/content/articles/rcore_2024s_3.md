@@ -193,3 +193,53 @@ Test write C OK!
 ```
 
 - 由于我们还没有写任何代码，因此出现 panic 是正常的。
+
+## 本章代码树
+
+```bash
+$ tree --gitignore
+.
+├── bootloader
+│   └── rustsbi-qemu.bin
+├── Dockerfile
+├── LICENSE
+├── Makefile
+├── os
+│   ├── build.rs
+│   ├── Cargo.toml
+│   ├── Makefile
+│   └── src
+│       ├── config.rs
+│       ├── console.rs
+│       ├── entry.asm
+│       ├── heap_alloc.rs
+│       ├── lang_items.rs
+│       ├── linker.ld
+│       ├── loader.rs
+│       ├── logging.rs
+│       ├── main.rs
+│       ├── sbi.rs
+│       ├── sync
+│       │   ├── mod.rs
+│       │   └── up.rs
+│       ├── syscall
+│       │   ├── fs.rs
+│       │   ├── mod.rs
+│       │   └── process.rs
+│       ├── task
+│       │   ├── context.rs
+│       │   ├── mod.rs
+│       │   ├── switch.rs
+│       │   ├── switch.S
+│       │   └── task.rs
+│       ├── timer.rs
+│       └── trap
+│           ├── context.rs
+│           ├── mod.rs
+│           └── trap.S
+├── README.md
+├── rust-toolchain.toml
+└── user
+
+9 directories, 33 files
+```
