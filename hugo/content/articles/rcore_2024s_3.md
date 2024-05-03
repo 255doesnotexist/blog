@@ -256,6 +256,44 @@ $ tree --gitignore
 
 > qemu 预留的内存空间是有限的，如果加载的程序过多，程序地址超出内存空间，可能出现 core dumped.
 
+> 与第二章相同，所有应用的 ELF 格式执行文件都经过 objcopy 工具丢掉所有 ELF header 和符号变为二进制镜像文件，随后以同样的格式通过在操作系统内核中嵌入 link_user.S 文件，在编译时直接把应用链接到内核的数据段中。不同的是，我们对相关模块进行了调整：在第二章中应用的加载和执行进度控制都交给 batch 子模块，而在第三章中我们将应用的加载这部分功能分离出来在 loader 子模块中实现，应用的执行和切换功能则交给 task 子模块。
+
+> 注意，我们需要调整每个应用被构建时使用的链接脚本 linker.ld 中的起始地址 BASE_ADDRESS ，这个地址是应用被内核加载到内存中的起始地址。也就是要做到：应用知道自己会被加载到某个地址运行，而内核也确实能做到将应用加载到它指定的那个地址。这算是应用和内核在某种意义上达成的一种协议。之所以要有这么苛刻的条件，是因为目前的操作系统内核的能力还是比较弱的，对应用程序通用性的支持也不够（比如不支持加载应用到内存中的任意地址运行），这也进一步导致了应用程序编程上不够方便和通用（应用需要指定自己运行的内存地址）。事实上，目前应用程序的编址方式是基于绝对位置的，并没做到与位置无关，内核也没有提供相应的地址重定位机制。
+
+- 目前使用如下脚本进行链接器定制。
+
+```python
+ # user/build.py
+
+ import os
+
+ base_address = 0x80400000
+ step = 0x20000
+ linker = 'src/linker.ld'
+
+ app_id = 0
+ apps = os.listdir('src/bin')
+ apps.sort()
+ for app in apps:
+     app = app[:app.find('.')]
+     lines = []
+     lines_before = []
+     with open(linker, 'r') as f: # 找到 BASE_ADDRESS 那行，替换成我们需要的
+         for line in f.readlines():
+             lines_before.append(line)
+             line = line.replace(hex(base_address), hex(base_address+step*app_id))
+             lines.append(line)
+     with open(linker, 'w+') as f:
+         f.writelines(lines)
+     os.system('cargo build --bin %s --release' % app) # 构建当前应用
+     print('[build.py] application %s start with address %s' %(app, hex(base_address+step*app_id)))
+     with open(linker, 'w+') as f: # 把 linker 脚本恢复原样
+         f.writelines(lines_before)
+     app_id = app_id + 1
+```
+
+- 还真有够脏的。但能用。
+
 ### 多道程序加载
 
 > 在第二章中负责应用加载和执行的子模块 batch 被拆分为 loader 和 task ， 前者负责启动时加载应用程序，后者负责切换和调度。
