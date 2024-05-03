@@ -255,3 +255,57 @@ $ tree --gitignore
 > 要一次加载运行多个程序，就要求每个用户程序被内核加载到内存中的起始地址都不同。 为此，我们编写脚本 user/build.py 为每个应用定制各自的起始地址。 它的思路很简单，对于每一个应用程序，使用 cargo rustc 单独编译， 用 -Clink-args=-Ttext=xxxx 选项指定链接时 .text 段的地址为 0x80400000 + app_id * 0x20000 。
 
 > qemu 预留的内存空间是有限的，如果加载的程序过多，程序地址超出内存空间，可能出现 core dumped.
+
+### 多道程序加载
+
+> 在第二章中负责应用加载和执行的子模块 batch 被拆分为 loader 和 task ， 前者负责启动时加载应用程序，后者负责切换和调度。
+
+> 其中， loader 模块的 load_apps 函数负责将所有用户程序在内核初始化的时一并加载进内存。
+
+```rust
+pub fn load_apps() {
+    extern "C" {
+        fn _num_app();
+    }
+    let num_app_ptr = _num_app as usize as *const usize;
+    let num_app = get_num_app();
+    let app_start = unsafe { core::slice::from_raw_parts(num_app_ptr.add(1), num_app + 1) };
+    // clear i-cache first
+    unsafe {
+        asm!("fence.i");
+    } // 还记得吗，上节说过实机不清理会出现奇奇怪怪的问题，但qemu不一定会 
+
+    /*
+    i-cache（指令缓存）是用于存储指令的高速缓存。它的目的是提高指令的访问速度，从而加快程序的执行。
+
+    在加载程序之前执行 i-cache 清理的原因是确保之前执行的指令不会对新加载的程序产生影响。在处理器的流水线中，指令是按照一定的顺序进行执行的。如果之前的指令被缓存到 i-cache 中，而这些指令与新加载的程序有相关性，可能会导致错误的执行结果。
+
+    通过执行 fence.i 指令，可以确保在加载新程序之前，所有之前的指令都已经完成，并且对 i-cache 中的指令进行了清理。fence.i 是一种屏障指令，它会强制处理器在执行后续指令之前，等待之前的所有指令都完成。
+
+    清理 i-cache 的目的是为了确保加载的新程序在一个干净的执行环境中开始执行，从而避免由于之前的指令对新程序造成的不正确的影响。这样可以增加程序的可靠性和可预测性，并且减少由于指令缓存引起的错误。
+    */
+
+    // load apps
+    for i in 0..num_app {
+        let base_i = get_base_i(i);
+        // clear region
+        (base_i..base_i + APP_SIZE_LIMIT)
+            .for_each(|addr| unsafe { (addr as *mut u8).write_volatile(0) });
+        // load app from data section to memory
+        let src = unsafe {
+            core::slice::from_raw_parts(app_start[i] as *const u8, app_start[i + 1] - app_start[i])
+        };
+        let dst = unsafe { core::slice::from_raw_parts_mut(base_i as *mut u8, src.len()) };
+        dst.copy_from_slice(src);
+    }
+}
+```
+
+```rust
+/// Get base address of app i.
+fn get_base_i(app_id: usize) -> usize {
+    APP_BASE_ADDRESS + app_id * APP_SIZE_LIMIT
+}
+```
+
+> 我们可以在 config 子模块中找到 APP_BASE_ADDRESS、APP_SIZE_LIMIT 这两个常数， APP_BASE_ADDRESS 被设置为 0x80400000 ， 而 APP_SIZE_LIMIT 和上一章一样被设置为 0x20000 。这种放置方式与 user/build.py 的实现一致。
