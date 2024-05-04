@@ -387,3 +387,99 @@ fn get_base_i(app_id: usize) -> usize {
 
 ### 任务切换的设计与实现
 
+- 任务切换主要针对先前针对不同应用程序定义的任务片进行片间切换，因此不涉及特权级切换、对应用也是透明的（APP 感受不到它的存在）。
+
+- Trap 控制流间可以通过 ```__switch``` 函数实现的换栈操作切换到不同的控制流。
+
+- ```__switch``` 基本上四步走：
+
+1. 调用 ```__switch``` 前，A 任务上下文、B 任务上下文不变，当前 SP 在 A 任务上下文上。
+
+2. A 任务保存 CPU 当前必要的寄存器快照到 A 任务的上下文空间。
+
+3. 读取下一任务指针（指向任务 B！）指向的任务上下文，根据它复原 CPU 寄存器。
+
+4. 把 SP 栈换到 B 的内核栈上。完成控制流切换。
+
+- 以下给出 rCore 的 switch 实现。
+
+```asm
+# os/src/task/switch.S
+
+.altmacro
+.macro SAVE_SN n
+    sd s\n, (\n+2)*8(a0)
+.endm
+.macro LOAD_SN n
+    ld s\n, (\n+2)*8(a1)
+.endm
+    .section .text
+    .globl __switch
+__switch:
+    # 阶段 [1]
+    # __switch(
+    #     current_task_cx_ptr: *mut TaskContext,
+    #     next_task_cx_ptr: *const TaskContext
+    # )
+    # 阶段 [2]
+    # save kernel stack of current task
+    sd sp, 8(a0)
+    # save ra & s0~s11 of current execution
+    sd ra, 0(a0)
+    .set n, 0
+    .rept 12
+        SAVE_SN %n
+        .set n, n + 1
+    .endr
+    # 阶段 [3]
+    # restore ra & s0~s11 of next execution
+    ld ra, 0(a1)
+    .set n, 0
+    .rept 12
+        LOAD_SN %n
+        .set n, n + 1
+    .endr
+    # restore kernel stack of next task
+    ld sp, 8(a1)
+    # 阶段 [4]
+    ret
+```
+
+- 值得一提的是，在 Rust 代码的定义里，我们可以实际看到 TaskContent 保存了哪些寄存器。
+
+```rust
+// os/src/task/context.rs
+
+pub struct TaskContext {
+    ra: usize,
+    sp: usize,
+    s: [usize; 12],
+}
+```
+
+- rCore 的文档真的很详细。它告诉我们，ra 寄存器保存了 __switch 返回后应该跳转到哪里继续执行。 s0~s11 这些被调用者保存的寄存器也有必要手动保存，因为 __switch 是一个汇编手工编写的函数，不包含在 Rust 编译器自动保存的范围里。
+
+> 我们会将这段汇编代码中的全局符号 __switch 解释为一个 Rust 函数：
+
+```rust
+// os/src/task/switch.rs
+
+global_asm!(include_str!("switch.S"));
+
+use super::TaskContext;
+
+extern "C" {
+    pub fn __switch(
+        current_task_cx_ptr: *mut TaskContext,
+        next_task_cx_ptr: *const TaskContext
+    );
+}
+```
+
+> 我们会调用该函数来完成切换功能而不是直接跳转到符号 __switch 的地址。因此在调用前后 Rust 编译器会自动帮助我们插入保存/恢复调用者保存寄存器的汇编代码。
+
+- TaskContext 很像是一个普通函数栈帧的内容喔。但是它会进行换栈，以便在不同的控制流之间切来切去。
+
+- 有一道思考题：当内核仅运行单个应用的时候，无论该任务主动/被动交出 CPU 资源最终都会交还给自己，这将导致传给 __switch 的两个参数相同，也就是某个 Trap 控制流自己切换到自己的情形。
+
+- 我觉得应该问题不大，只是会多一层保存寄存器到自身 TaskContext，然后再从自身 TaskContext 加载的开销吧。
